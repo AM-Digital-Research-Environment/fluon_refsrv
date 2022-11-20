@@ -9,6 +9,6 @@ RUN pip install --upgrade pip \
 
 COPY . .
 
-ENTRYPOINT ["python"]
+ENTRYPOINT ["uwsgi"]
 
-CMD ["app.py"]
+CMD ["--http", "0.0.0.0:5000", "--master", "-p", "4", "-w", "app:app"]

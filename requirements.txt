@@ -9,5 +9,6 @@ jsonschema==4.17.0
 MarkupSafe==2.1.1
 pyrsistent==0.19.2
 pytz==2022.6
+pyuwsgi==2.0.21
 six==1.16.0
 Werkzeug==2.2.2
