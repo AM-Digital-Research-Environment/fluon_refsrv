@@ -34,7 +34,7 @@ class Keywords(Resource):
     def get(self, user):
         args = request.args.to_dict()
         print('logging user', user)
-        return {'q': args['q'] + ' ' + ' '.join(['foo', 'bar'])}
+        return {'query': args['q'] + ' ' + ' '.join(['foo', 'bar'])}
 
 
 @ns.route('/api/v1/rank/<int:user>')
