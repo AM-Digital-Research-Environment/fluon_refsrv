@@ -167,7 +167,7 @@ idPayload = api.model(
                 "ID of a single WissKI entity, format:"
                 " &lt;bundleid&gt;:&lt;entityid&gt;"
             ),
-            example="b06c0a140746384f0729b3b402be1aa6:25",
+            example="25",
         )
     },
 )
@@ -208,7 +208,7 @@ rankingObject = api.model(
             ),
             example=(
                 '[{"reason": "profile"}, {"removed":'
-                ' ["b06c0a140746384f0729b3b402be1aa6:25"]}]'
+                ' ["25"]}]'
             ),
             strict=False,
             validate=False,
@@ -220,7 +220,7 @@ ranking_doc = (
     "Re-rank and potentially extend the supplied set of WissKI entities."
     "<br><br><strong>Testing</strong><br>For testing purposes, this"
     " endpoint will replace the first item in `ids` (index 0) with the entity"
-    " `b06c0a140746384f0729b3b402be1aa6:72` (Wolfgang Petry)."
+    " `374` (Wolfgang Petry)."
 )
 
 
@@ -253,12 +253,13 @@ class RankingResults(Resource):
         args = parser.parse_args()
 
         if len(args["ids"]) == 0 or args["ids"] is None:
-            response = [{"id": "b06c0a140746384f0729b3b402be1aa6:72"}]
+            response = [{"id":
+                         "374"}]
             meta = json.dumps([{"reason": "empty"}])
         else:
             response = args["ids"]
             repl = response[0]
-            response[0] = {"id": "b06c0a140746384f0729b3b402be1aa6:72"}
+            response[0] = {"id": "374"}
             meta = json.dumps([{"reason": "profile"}, {"removed": repl["id"]}])
 
         flog.info(
@@ -295,7 +296,7 @@ detailPayload = api.model(
                 "ID of a single WissKI entity, format:"
                 " &lt;bundleid&gt;:&lt;entityid&gt;"
             ),
-            example="b06c0a140746384f0729b3b402be1aa6:72",
+            example="374",
         ),
         "user": fields.String(
             required=False,
@@ -318,8 +319,8 @@ detailObject = api.model(
             ),
             example=(
                 '[{"type": "suggestion"}, {"ids":'
-                ' ["b379041a73cc34b080e5ae5ad6b592d4:1",'
-                ' "b379041a73cc34b080e5ae5ad6b592d4:2"]}]'
+                ' ["1",'
+                ' "2"]}]'
             ),
             strict=False,
             validate=False,
@@ -367,8 +368,8 @@ class DetailResults(Resource):
                 {"type": "suggestion"},
                 {
                     "ids": [
-                        "b379041a73cc34b080e5ae5ad6b592d4:1",
-                        "b379041a73cc34b080e5ae5ad6b592d4:2",
+                        "1",
+                        "2",
                     ]
                 },
             ]
