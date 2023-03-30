@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 import logging
 
 from flask import Flask
@@ -34,6 +35,7 @@ class StructuredMessage:
         self.kwargs = kwargs
 
     def __str__(self):
+        self.kwargs.update({"time": str(datetime.now())})
         return "%s" % (json.dumps(self.kwargs))
 
 
