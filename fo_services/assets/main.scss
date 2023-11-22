@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "fonts";
+
+input[type="text"], input[type="password"] {
+  @apply bg-slate-100 rounded-sm text-slate-700;
+}
+
+.btn-primary {
+  @apply bg-emerald-300 text-emerald-900 text-lg font-bold rounded-sm py-1 ;
+}
