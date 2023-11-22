@@ -1,0 +1,18 @@
+{
+  "name": "fo_services",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@gitlab.uni-bayreuth.de:bt307260/fluon-refsrv.git",
+  "author": "Oliver Baumann <oliver.baumann@uni-bayreuth.de>",
+  "license": "Proprietary",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "autoprefixer": "^10.4.16",
+    "tailwindcss": "^3.3.5"
+  },
+  "scripts": {
+    "watch": "tailwindcss --input ./fo_services/assets/main.scss --output ./fo_services/static/main.css --watch",
+    "build": "tailwindcss --input ./fo_services/assets/main.scss --output ./fo_services/static/main.css --minify"
+  }
+}
