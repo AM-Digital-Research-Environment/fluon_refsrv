@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    ports:
+      - 5000:5000
+    volumes:
+      - ./fo_services:/app/fo_services
+      - database:/app/instance/fo_services.sqlite
+    command: ["--app", "fo_services", "run", "--host", "0.0.0.0", "--debug"]
+    entrypoint: ["/app/venv/bin/flask"]
+
+volumes:
+  database: {}

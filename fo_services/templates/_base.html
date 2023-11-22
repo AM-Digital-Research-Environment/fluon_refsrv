@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body class="bg-slate-800 text-slate-50 font-mono max-w-[1000px] mx-auto">
+<div class="px-4 py-4 mx-auto">
+    <nav class="flex flex-row justify-between items-center pb-2 mb-4 border-b border-dashed border-amber-400">
+        <h1 class="text-2xl">
+            <a href="{{ url_for('index') }}">Fluid Ontology Services</a>
+        </h1>
+        <ul>
+            {% if g.user %}
+                <li><span>{{ g.user['name'] }}</span></li>
+                <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+            {% else %}
+                <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    <section>
+        <header>
+            {% block header %}{% endblock %}
+        </header>
+        {% for message in get_flashed_messages() %}
+            <div>{{ message }}</div>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </section>
+</div>
+</body>
+</html>

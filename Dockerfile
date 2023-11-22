@@ -28,4 +28,4 @@ EXPOSE 5000
 
 ENV PATH="/app/venv/bin:$PATH"
 ENTRYPOINT ["uwsgi"]
-CMD ["--http", "0.0.0.0:5000", "--master", "-p", "4", "-w", "app:app"]
+CMD ["--http", "0.0.0.0:5000", "--master", "-p", "4", "-w", "wsgi:app"]
