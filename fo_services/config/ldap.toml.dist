@@ -1,0 +1,6 @@
+uri = "<LDAP_URI>"
+base = "<LDAP_BASE>"
+bind_dn = "<BIND_DN>"
+bind_password = "<BIND_PASSWORD>"
+filter = "<GLOBAL_FILTER>"
+starttls = 1

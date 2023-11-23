@@ -7,7 +7,7 @@ from fo_services import LDAPAuthClient
 
 def get_client():
     if 'ldap_client' not in g:
-        with current_app.open_resource('ldap.toml', 'rb') as f:
+        with current_app.open_resource('config/ldap.toml', 'rb') as f:
             ldap_config = tomllib.load(f)
 
         ldap_config = LDAPAuthClient.parse_config(ldap_config)
