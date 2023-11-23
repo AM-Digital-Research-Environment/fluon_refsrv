@@ -15,8 +15,8 @@ FROM python:3.11-slim@sha256:161a52751dd68895c01350e44e9761e3965e4cef0f983bc5b6c
 RUN groupadd -g 999 python \
     && useradd -r -u 999 -g python python
 
-RUN mkdir /app \
-    && chown python:python /app
+RUN mkdir /app /app/instance \
+    && chown python:python /app /app/instance
 WORKDIR /app
 
 COPY --chown=python:python --from=build /app/venv ./venv

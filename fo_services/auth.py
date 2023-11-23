@@ -5,6 +5,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from fo_services import ldap
 from fo_services.db import get_db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -44,8 +45,20 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        db = get_db()
+
         error = None
+
+        client = ldap.get_client()
+        success = client.auth(username, password)
+        if not success:
+            flash("Error authenticating against LDAP")
+            return redirect(url_for('auth.login'))
+
+        g.user = username
+        flash("Login successful")
+        return redirect(url_for('index'))
+
+
         user = db.execute(
             'SELECT * FROM user WHERE name = ?',
             (username,)
@@ -84,6 +97,7 @@ def load_logged_in_user():
 def logout():
     session.clear()
     return redirect(url_for('index'))
+
 
 def require_auth(view):
     @functools.wraps(view)
