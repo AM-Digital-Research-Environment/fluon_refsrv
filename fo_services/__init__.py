@@ -1,10 +1,13 @@
 import logging
 import os
+import tomllib
 
-from flask import Flask, render_template
+from flask import Flask, render_template, flash
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from .LDAPAuthClient import LDAPAuthClient, LDAPConfig
+from fo_services.LDAPAuthClient import LDAPAuthClient, LDAPExtension
+
+LDAP = LDAPExtension()
 
 
 def create_app(test_config=None):
@@ -12,12 +15,17 @@ def create_app(test_config=None):
     app.logger.setLevel(logging.DEBUG)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'fo_services.sqlite'),
-        SWAGGER_UI_DOC_EXPANSION='list',
+        SECRET_KEY="dev",
+        DATABASE=os.path.join(app.instance_path, "fo_services.sqlite"),
+        SWAGGER_UI_DOC_EXPANSION="list",
         RESTX_MASK_SWAGGER=False,
         RESTX_MASK_HEADER=None,
     )
+
+    if test_config is None:
+        app.config.from_pyfile("config.py", silent=True)
+    else:
+        app.config.from_mapping(test_config)
 
     try:
         os.makedirs(app.instance_path)
@@ -26,12 +34,21 @@ def create_app(test_config=None):
 
     @app.route("/", methods=["GET"])
     def index():
-        return render_template('index.html')
+        flash("This is a successful message", "success")
+        flash("This is an error message", "error")
+        return render_template("index.html")
 
     from . import db
+
     db.init_app(app)
 
     from . import auth
+
+    with app.open_resource("config/ldap.toml") as f:
+        ldap_config = tomllib.load(f)
+
+    LDAP.init_app(app, ldap_config)
+
     app.register_blueprint(auth.bp)
 
     return app

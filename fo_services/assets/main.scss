@@ -11,3 +11,14 @@ input[type="text"], input[type="password"] {
 .btn-primary {
   @apply bg-emerald-300 text-emerald-900 text-lg font-bold rounded-sm py-1 ;
 }
+
+.flash {
+  @apply border border-dashed rounded px-8 py-4;
+  &.flash-error {
+    @apply bg-orange-500 font-bold text-slate-600;
+  }
+  &.flash-success {
+    @apply bg-emerald-500 font-bold;
+
+  }
+}

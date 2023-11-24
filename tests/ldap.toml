@@ -1,0 +1,6 @@
+uri = "FAKE_URI"
+base = "FAKE_BASE"
+bind_dn = "FAKE_DN"
+bind_password = "FAKE_PASSWORD"
+filter = "FAKE_FILTER"
+starttls = 1
