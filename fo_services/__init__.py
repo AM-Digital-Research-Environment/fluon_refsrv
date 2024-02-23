@@ -13,7 +13,11 @@ from flask_login import LoginManager
 import logging
 logger = logging.getLogger(__name__)
 
+from .kgstuff import KGHandler
+
+
 LDAP = LDAPExtension()
+KGHandler = KGHandler()
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -57,6 +61,7 @@ def create_app(test_config=None):
         ldap_config = tomllib.load(f)
 
     LDAP.init_app(app, ldap_config)
+    KGHandler.load_shit()
 
     app.register_blueprint(auth)
     app.register_blueprint(api)
