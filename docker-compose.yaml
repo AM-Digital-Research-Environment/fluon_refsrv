@@ -15,6 +15,8 @@ services:
   db:
     image: postgres:latest
     restart: always
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: fo_services
       POSTGRES_PASSWORD: fo_services
@@ -23,10 +25,25 @@ services:
       - db:/var/lib/postgresql/data
     networks:
       - backbone
-
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: fo_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "bla@fasel.com"
+      PGADMIN_DEFAULT_PASSWORD: 123
+    depends_on:
+      - db
+    networks:
+      - backbone
+    ports:
+      - "8888:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
 
 volumes:
   instance: {}
   db: {}
+  pgadmin-data: {}
 networks:
   backbone: {}

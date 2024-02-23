@@ -10,17 +10,16 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from fo_services.LDAPAuthClient import LDAPAuthClient, LDAPExtension
 from flask_login import LoginManager
 
+import logging
+logger = logging.getLogger(__name__)
 
-class Base(DeclarativeBase):
-    pass
-
-
-LOGIN_MANAGER = LoginManager()
+# ~ LOGIN_MANAGER = LoginManager()
 LDAP = LDAPExtension()
-DB = SQLAlchemy(model_class=Base)
+# ~ DB = SQLAlchemy(model_class=Base)
 
 
 def create_app(test_config=None):
+    logger.debug(f"create_app")
     app = Flask(__name__)
     app.logger.setLevel(logging.DEBUG)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
@@ -50,8 +49,13 @@ def create_app(test_config=None):
         flash("This is an error message", "error")
         return render_template("index.html")
 
-    # LOGIN_MANAGER.init_app(app)
-    DB.init_app(app)
+    #LOGIN_MANAGER.init_app(app)
+    from .db import db_session, init_db
+    init_db()
+
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db_session.remove()
 
     from . import auth
 
