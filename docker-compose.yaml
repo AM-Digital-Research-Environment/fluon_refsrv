@@ -8,6 +8,25 @@ services:
       - instance:/app/instance/
     command: ["--app", "fo_services", "run", "--host", "0.0.0.0", "--debug"]
     entrypoint: ["/app/venv/bin/flask"]
+    networks:
+      - backbone
+    depends_on:
+      - db
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: fo_services
+      POSTGRES_PASSWORD: fo_services
+      POSTGRES_DB: fo_services
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - backbone
+
 
 volumes:
   instance: {}
+  db: {}
+networks:
+  backbone: {}

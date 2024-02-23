@@ -3,11 +3,21 @@ import os
 import tomllib
 
 from flask import Flask, render_template, flash
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from fo_services.LDAPAuthClient import LDAPAuthClient, LDAPExtension
+from flask_login import LoginManager
 
+
+class Base(DeclarativeBase):
+    pass
+
+
+LOGIN_MANAGER = LoginManager()
 LDAP = LDAPExtension()
+DB = SQLAlchemy(model_class=Base)
 
 
 def create_app(test_config=None):
@@ -32,15 +42,16 @@ def create_app(test_config=None):
     except:
         pass
 
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://db"
+
     @app.route("/", methods=["GET"])
     def index():
         flash("This is a successful message", "success")
         flash("This is an error message", "error")
         return render_template("index.html")
 
-    from . import db
-
-    db.init_app(app)
+    # LOGIN_MANAGER.init_app(app)
+    DB.init_app(app)
 
     from . import auth
 
@@ -52,3 +63,8 @@ def create_app(test_config=None):
     app.register_blueprint(auth.bp)
 
     return app
+
+
+# @LOGIN_MANAGER.user_loader
+# def load_user(user_id):
+#     return User.get(user_id)

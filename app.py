@@ -7,6 +7,8 @@ from flask_httpauth import HTTPBasicAuth
 from flask_restx import Api, Resource, fields, reqparse
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from blueprints.dashboard.dashboard import bp
+
 flog = logging.getLogger("file")
 flog.setLevel(logging.INFO)
 fh = logging.FileHandler("requests.log")
@@ -41,21 +43,12 @@ class StructuredMessage:
 
 _ = StructuredMessage  # optional, to improve readability
 
-app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
-
-app.config["SWAGGER_UI_DOC_EXPANSION"] = "list"
-app.config["RESTX_MASK_SWAGGER"] = False
-app.config["RESTX_MASK_HEADER"] = None
-
 authorizations = {"basic": {"type": "basic"}}
 api = Api(
     app,
     version="1.0",
     title="Fluid Ontologies API",
-    description=(
-        "Reference implementation of a server handling fluid ontologies."
-    ),
+    description=("Reference implementation of a server handling fluid ontologies."),
     authorizations=authorizations,
     security="basic",
 )
@@ -114,9 +107,7 @@ class Query(Resource):
     @auth.login_required
     @queries.expect(queryPayload)
     @queries.marshal_with(queryObject)
-    @queries.response(
-        401, "Unauthorized", headers={"www-authenticate": "auth prompt"}
-    )
+    @queries.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
@@ -128,9 +119,7 @@ class Query(Resource):
                 " empty for anonymous users"
             ),
         )
-        parser.add_argument(
-            "query", type=str, help="The search query made by the user"
-        )
+        parser.add_argument("query", type=str, help="The search query made by the user")
         args = parser.parse_args()
 
         extended = args["query"]
@@ -205,13 +194,8 @@ rankingObject = api.model(
         "ids": fields.List(fields.Nested(idPayload)),
         "meta": fields.String(
             required=True,
-            description=(
-                "Metadata describing the re-ranking; an escaped JSON-string"
-            ),
-            example=(
-                '[{"reason": "profile"}, {"removed":'
-                ' ["25"]}]'
-            ),
+            description=("Metadata describing the re-ranking; an escaped JSON-string"),
+            example=('[{"reason": "profile"}, {"removed":' ' ["25"]}]'),
             strict=False,
             validate=False,
         ),
@@ -231,9 +215,7 @@ class RankingResults(Resource):
     @auth.login_required
     @ranking.expect(rankingPayload)
     @ranking.marshal_with(rankingObject)
-    @ranking.response(
-        401, "Unauthorized", headers={"www-authenticate": "auth prompt"}
-    )
+    @ranking.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
@@ -255,8 +237,7 @@ class RankingResults(Resource):
         args = parser.parse_args()
 
         if len(args["ids"]) == 0 or args["ids"] is None:
-            response = [{"id":
-                         "374"}]
+            response = [{"id": "374"}]
             meta = json.dumps([{"reason": "empty"}])
         else:
             response = args["ids"]
@@ -316,14 +297,8 @@ detailObject = api.model(
     {
         "meta": fields.String(
             required=True,
-            description=(
-                "Metadata describing the entity; an escaped JSON-string"
-            ),
-            example=(
-                '[{"type": "suggestion"}, {"ids":'
-                ' ["1",'
-                ' "2"]}]'
-            ),
+            description=("Metadata describing the entity; an escaped JSON-string"),
+            example=('[{"type": "suggestion"}, {"ids":' ' ["1",' ' "2"]}]'),
             strict=False,
             validate=False,
         ),
@@ -343,9 +318,7 @@ class DetailResults(Resource):
     @auth.login_required
     @detail.expect(detailPayload)
     @detail.marshal_with(detailObject)
-    @detail.response(
-        401, "Unauthorized", headers={"www-authenticate": "auth prompt"}
-    )
+    @detail.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
@@ -391,4 +364,5 @@ class DetailResults(Resource):
 
 
 if __name__ == "__main__":
+    app.register_blueprint(bp)
     app.run(debug=True, host="0.0.0.0")
