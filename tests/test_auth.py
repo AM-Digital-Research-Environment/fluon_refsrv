@@ -4,7 +4,7 @@ from flask import Flask, session
 from flask.testing import FlaskClient
 
 from fo_services import LDAPAuthClient
-from fo_services.db import get_db
+from fo_services.db import get_user
 
 
 def test_register(client: FlaskClient, app: Flask):
@@ -14,8 +14,7 @@ def test_register(client: FlaskClient, app: Flask):
 
     with app.app_context():
         assert (
-            get_db().execute("SELECT * FROM user WHERE name = 'a'").fetchone()
-            is not None
+            get_user('a') is not None
         )
 
 
@@ -24,7 +23,7 @@ def test_register(client: FlaskClient, app: Flask):
     (
         ("", "", b"Username is required"),
         ("a", "", b"Password is required"),
-        ("test", "test", b"already registered"),
+        ("a", "a", b"already registered"),
     ),
 )
 def test_register_validate(
