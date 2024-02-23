@@ -2,34 +2,27 @@ import json
 from datetime import datetime
 import logging
 
-from flask import Flask
+from flask import Flask, Blueprint, session, g
 from flask_httpauth import HTTPBasicAuth
+from .auth import check_login
+
 from flask_restx import Api, Resource, fields, reqparse
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from blueprints.dashboard.dashboard import bp
 
-bp = Blueprint("auth", __name__, url_prefix="/auth")
-flog = logging.getLogger("file")
-flog.setLevel(logging.INFO)
-fh = logging.FileHandler("requests.log")
-fh.setLevel(logging.INFO)
-fh.setFormatter(logging.Formatter("%(message)s"))
-flog.addHandler(fh)
+bp = Blueprint("api", __name__, url_prefix="/api/v1")
+
+import logging
+flog = logging.getLogger(__name__)
 
 auth = HTTPBasicAuth()
-
-users = {
-    "crusoe": "2TG_Dd9oXAsDSYpZVkpDRg",
-    "dmkg": "YdOrbFS6jdjx-G3T8qxawg",
-}
-
-
-@auth.get_password
-def get_password(user):
-    if user in users:
-        return users.get(user)
-
+@auth.verify_password
+def verify_password(the_user, password):
+    flog.info(f"trying to login {the_user}")
+    success, known_user = check_login(the_user, password)
+    if success:
+      return known_user.name
     return None
 
 
@@ -44,19 +37,18 @@ class StructuredMessage:
 
 _ = StructuredMessage  # optional, to improve readability
 
-authorizations = {"basic": {"type": "basic"}}
 api = Api(
-    app,
+    bp,
     version="1.0",
     title="Fluid Ontologies API",
     description=("Reference implementation of a server handling fluid ontologies."),
-    authorizations=authorizations,
+    authorizations={"basicAuth": {"type": "basic"}},
     security="basic",
 )
 
 queries = api.namespace(
     "Queries",
-    path="/api/v1/queries",
+    path="/queries",
     description="Endpoints for manipulating raw search queries",
 )
 
@@ -140,7 +132,7 @@ class Query(Resource):
 
 ranking = api.namespace(
     "Ranking",
-    path="/api/v1/rank",
+    path="/rank",
     description="Endpoints for ranking search results",
 )
 
@@ -262,7 +254,7 @@ class RankingResults(Resource):
 
 detail = api.namespace(
     "Detail",
-    path="/api/v1/detail",
+    path="/detail",
     description="Endpoints for detail-views of entities",
 )
 
@@ -364,6 +356,12 @@ class DetailResults(Resource):
         return DetailResponse(meta=meta)
 
 
-if __name__ == "__main__":
-    app.register_blueprint(bp)
-    app.run(debug=True, host="0.0.0.0")
+
+# ~ def require_auth(view):
+    # ~ @functools.wraps(view)
+    # ~ def wrapped_view(**kwargs):
+        # ~ if g.user is None:
+            # ~ return redirect(url_for("auth.login"))
+        # ~ return view(**kwargs)
+
+    # ~ return wrapped_view

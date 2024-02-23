@@ -22,6 +22,30 @@ logger = logging.getLogger(__name__)
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
+def check_login(username, password):
+    known_user = get_user(username)
+    if known_user is not None and not known_user.is_ldap_user:
+        success = check_password_hash(known_user.password, password)
+    else:
+        client = LDAP.get_client()
+        success = client.auth(username, password)
+    
+        if success:
+            known_user = get_user(username)
+            if known_user is None:
+                try:
+                    known_user = User(username, is_ldap_user=True)
+                    db_session.add(known_user)
+                    db_session.commit()
+                except:
+                    logging.info(f"cant add {username} to the db during login as it is already registered")
+    if success:
+        g.user = known_user
+        session.clear()
+        session["user_id"] = username
+        return (True,known_user)
+    return (False, None)
+
 @bp.route("/user/create", methods=("GET", "POST"))
 def create_user():
     if request.method == "POST":
@@ -54,22 +78,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         
-        known_user = get_user(username)
-        if known_user is not None and not known_user.is_ldap_user:
-            success = check_password_hash(known_user.password, password)
-        else:
-            client = LDAP.get_client()
-            success = client.auth(username, password)
-        
-            if success:
-                known_user = get_user(username)
-                if known_user is None:
-                    try:
-                        known_user = User(username, is_ldap_user=True)
-                        db_session.add(known_user)
-                        db_session.commit()
-                    except:
-                        logging.info(f"cant add {username} to the db during login as it is already registered")
+        success,known_user = check_login(username, password)
             
         if success:
             g.user = known_user

@@ -19,7 +19,6 @@ LDAP = LDAPExtension()
 
 
 def create_app(test_config=None):
-    logger.debug(f"create_app")
     app = Flask(__name__)
     app.logger.setLevel(logging.DEBUG)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
@@ -57,14 +56,16 @@ def create_app(test_config=None):
     def shutdown_session(exception=None):
         db_session.remove()
 
-    from . import auth
+    from .auth import bp as auth
+    from .app_v1 import bp as api
 
     with app.open_resource("config/ldap.toml") as f:
         ldap_config = tomllib.load(f)
 
     LDAP.init_app(app, ldap_config)
 
-    app.register_blueprint(auth.bp)
+    app.register_blueprint(auth)
+    app.register_blueprint(api)
 
     return app
 
