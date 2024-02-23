@@ -38,3 +38,7 @@ typing_extensions==4.8.0
 uWSGI==2.0.23
 Werkzeug==2.3.8
 zope.interface==6.1
+torch==2.2.1
+numpy==1.26.4
+pandas==2.2.0
+scipy==1.12.0

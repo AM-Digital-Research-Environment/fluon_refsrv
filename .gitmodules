@@ -1,0 +1,3 @@
+[submodule "fo_services/kgstuff/kgat_pytorch"]
+	path = fo_services/kgstuff/kgat_pytorch
+	url = https://github.com/LunaBlack/KGAT-pytorch.git

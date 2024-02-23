@@ -9,8 +9,6 @@ from .auth import check_login
 from flask_restx import Api, Resource, fields, reqparse
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from blueprints.dashboard.dashboard import bp
-
 bp = Blueprint("api", __name__, url_prefix="/api/v1")
 
 import logging
