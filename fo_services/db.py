@@ -31,5 +31,6 @@ def get_user(username):
     try:
         u = db_session.query(User).filter(User.name==username).one()
         return u
-    except NoResultFound:
-        return None
+    except:
+        pass
+    return None

@@ -13,10 +13,7 @@ from flask_login import LoginManager
 import logging
 logger = logging.getLogger(__name__)
 
-# ~ LOGIN_MANAGER = LoginManager()
 LDAP = LDAPExtension()
-# ~ DB = SQLAlchemy(model_class=Base)
-
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -24,7 +21,6 @@ def create_app(test_config=None):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     app.config.from_mapping(
         SECRET_KEY="dev",
-        DATABASE=os.path.join(app.instance_path, "fo_services.sqlite"),
         SWAGGER_UI_DOC_EXPANSION="list",
         RESTX_MASK_SWAGGER=False,
         RESTX_MASK_HEADER=None,
@@ -40,15 +36,12 @@ def create_app(test_config=None):
     except:
         pass
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://db"
-
     @app.route("/", methods=["GET"])
     def index():
         flash("This is a successful message", "success")
         flash("This is an error message", "error")
         return render_template("index.html")
 
-    #LOGIN_MANAGER.init_app(app)
     from .db import db_session, init_db
     init_db()
 
@@ -57,6 +50,7 @@ def create_app(test_config=None):
         db_session.remove()
 
     from .auth import bp as auth
+    from .app_test_v1 import bp as recommender
     from .app_v1 import bp as api
 
     with app.open_resource("config/ldap.toml") as f:
@@ -66,10 +60,6 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth)
     app.register_blueprint(api)
+    app.register_blueprint(recommender)
 
     return app
-
-
-# @LOGIN_MANAGER.user_loader
-# def load_user(user_id):
-#     return User.get(user_id)
