@@ -1,0 +1,31 @@
+--- loader_base.py	2024-02-16 09:55:23.367144341 +0100
+@@ -101,7 +101,7 @@
+         if batch_size <= len(exist_users):
+             batch_user = random.sample(exist_users, batch_size)
+         else:
+-            batch_user = [random.choice(exist_users) for _ in range(batch_size)]
++            batch_user = [random.choice(list(exist_users)) for _ in range(batch_size)]
+ 
+         batch_pos_item, batch_neg_item = [], []
+         for u in batch_user:
+@@ -152,7 +152,7 @@
+         if batch_size <= len(exist_heads):
+             batch_head = random.sample(exist_heads, batch_size)
+         else:
+-            batch_head = [random.choice(exist_heads) for _ in range(batch_size)]
++            batch_head = [random.choice(list(exist_heads)) for _ in range(batch_size)]
+ 
+         batch_relation, batch_pos_tail, batch_neg_tail = [], [], []
+         for h in batch_head:
+@@ -176,10 +176,10 @@
+         pretrain_data = np.load(pretrain_path)
+         self.user_pre_embed = pretrain_data['user_embed']
+         self.item_pre_embed = pretrain_data['item_embed']
+-
+         assert self.user_pre_embed.shape[0] == self.n_users
+         assert self.item_pre_embed.shape[0] == self.n_items
+         assert self.user_pre_embed.shape[1] == self.args.embed_dim
+         assert self.item_pre_embed.shape[1] == self.args.embed_dim
++        print("using pretrained data from",pretrain_path)
+ 
+ 
