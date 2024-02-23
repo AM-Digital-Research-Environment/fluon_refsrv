@@ -9,6 +9,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from blueprints.dashboard.dashboard import bp
 
+bp = Blueprint("auth", __name__, url_prefix="/auth")
 flog = logging.getLogger("file")
 flog.setLevel(logging.INFO)
 fh = logging.FileHandler("requests.log")

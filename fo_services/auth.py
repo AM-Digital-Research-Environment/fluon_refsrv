@@ -14,7 +14,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from fo_services import LDAP
 from fo_services.db import db_session, get_user
-from fo_services.db_models import User
+from fo_services.models.User import User
 
 import logging
 logger = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ def login():
         password = request.form["password"]
         
         known_user = get_user(username)
-        if known_user is not None:
+        if known_user is not None and not known_user.is_ldap_user:
             success = check_password_hash(known_user.password, password)
         else:
             client = LDAP.get_client()
