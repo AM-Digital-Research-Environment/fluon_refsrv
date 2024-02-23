@@ -10,7 +10,7 @@ from flask import (
     session,
     url_for,
 )
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from fo_services import LDAP
 from fo_services.db import db_session, get_user
@@ -54,26 +54,22 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         
-        # check ldap first
-        client = LDAP.get_client()
-        success = client.auth(username, password)
-        
-        if success:
-            try:
-                known_user = User(username, is_ldap_user=True)
-                db_session.add(known_user)
-                db_session.commit()
-            except:
-                logging.info(f"cant add {username} to the db during login as it is already registered")
+        known_user = get_user(username)
+        if known_user is not None:
+            success = check_password_hash(known_user.password, password)
         else:
-            # lookup local user object, creating one if it doesn't exist
-            known_user = get_user(username)
-            if known_user is not None:
-                logger.debug("found user:",known_user.name)
-                logger.debug(known_user.password)
-                logger.debug(generate_password_hash(password))
-                if known_user.password == generate_password_hash(password):
-                    success = True
+            client = LDAP.get_client()
+            success = client.auth(username, password)
+        
+            if success:
+                known_user = get_user(username)
+                if known_user is None:
+                    try:
+                        known_user = User(username, is_ldap_user=True)
+                        db_session.add(known_user)
+                        db_session.commit()
+                    except:
+                        logging.info(f"cant add {username} to the db during login as it is already registered")
             
         if success:
             g.user = known_user
