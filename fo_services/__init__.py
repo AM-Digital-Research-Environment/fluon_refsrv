@@ -42,7 +42,7 @@ def create_app(test_config=None):
     except:
         pass
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://db"
 
     @app.route("/", methods=["GET"])
     def index():
