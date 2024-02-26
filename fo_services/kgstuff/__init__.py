@@ -15,6 +15,8 @@ from model.KGAT import KGAT
 from utils.log_helper import *
 from utils.model_helper import *
 
+from ..db import get_wisski_id_for_rec_id, get_recomm_id_for_wisski_user
+
 class KGHandler():
 
   def load_shit(self):
@@ -87,8 +89,9 @@ class KGHandler():
         
 
   def recommend_me_something(self,user_id):
-    logger.debug(f"recommending something for {user_id}")
     u = int(user_id)
-    if u < self.rank_indices.shape[0]:
-      return self.rank_indices[u,:].tolist()
+    r_id = get_recomm_id_for_wisski_user(u)
+    logger.debug(f"recommending something for wisski user {user_id} ({r_id})")
+    if r_id < self.rank_indices.shape[0]:
+      return [get_wisski_id_for_rec_id(i) for i in self.rank_indices[u,:].tolist()]
     return "1,2,3,4,5,6,10"

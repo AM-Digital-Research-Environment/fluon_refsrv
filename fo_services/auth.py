@@ -14,7 +14,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from fo_services import LDAP
 from fo_services.db import db_session, get_user
-from fo_services.models.User import User
+from fo_services.models import User
 
 import logging
 logger = logging.getLogger(__name__)
