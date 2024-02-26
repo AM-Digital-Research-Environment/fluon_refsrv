@@ -10,26 +10,42 @@ import os
 import sys
 sys.path.insert(0,'/app/fo_services/kgstuff/kgat_pytorch')
 
+
 from data_loader.loader_kgat import DataLoaderKGAT
 from model.KGAT import KGAT
 from utils.log_helper import *
 from utils.model_helper import *
 
-from ..db import get_wisski_id_for_rec_id, get_recomm_id_for_wisski_user
+from ..db import get_wisski_id_for_rec_id, get_recomm_id_for_wisski_user, fill_recomm_entity
 
 class KGHandler():
-
+  
+  def load_entities_if_necessary(self, entity_file):
+    if not os.path.exists(entity_file + '.mtime'):
+      last_check = 0.0
+    else:
+      with open(entity_file + '.mtime', 'r') as _mtime:
+        last_check = float(_mtime.readline().strip())
+    
+    timestamp = os.path.getmtime(entity_file)
+    if last_check < timestamp:
+      logger.debug(f"entites seem to have changed. reloading entities from {entity_file}")
+      with open(entity_file + '.mtime', 'w') as _mtime:
+        print(timestamp, file=_mtime)
+      fill_recomm_entity(entity_file)
+      
+  
   def load_shit(self):
     logger.debug(f"loading models and stuff")
     # we want to mimic the args-Object here without calling parse_args...
     # https://stackoverflow.com/a/2827734
     args = lambda:None
     args.seed = 2024
-    args.data_name = 'data'
     args.data_dir = '/'
+    args.data_name = 'data'
     args.use_pretrain = 2
-    args.pretrain_model_path = '/data/model.pth'
-    args.pretrain_embedding_dir = '/data/'
+    args.pretrain_model_path = f'{args.data_dir}/{args.data_name}/model.pth'
+    args.pretrain_embedding_dir = f'{args.data_dir}/{args.data_name}/'
     args.cf_batch_size = 1024 
     args.kg_batch_size = 2048 
     args.test_batch_size = 10000 
@@ -49,6 +65,8 @@ class KGHandler():
     args.evaluate_every = 10
     args.Ks = '[10]'
     
+    # import recommendable items to database
+    self.load_entities_if_necessary(f'{args.data_dir}/{args.data_name}/items_id.txt')
     
     torch.manual_seed(args.seed)# GPU / CPU
     self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -21,8 +21,7 @@ Base.query = db_session.query_property()
 
 from .models import User, RecommUser, RecommItem
 
-def fill_recomm_entity(sep=' '):
-    entity_file = '/data/items_id.txt'
+def fill_recomm_entity(entity_file, sep=' '):
     with open(entity_file, 'r') as _in:
         header = _in.readline()
         logger.debug(header)
@@ -37,7 +36,6 @@ def fill_recomm_entity(sep=' '):
             stmt = insert(RecommItem.__table__).values(wisski_id=_wid, recomm_id=_id).on_conflict_do_nothing()
             db_session.execute(stmt)
             db_session.commit()
-    
             
 
 def init_db():
@@ -46,7 +44,7 @@ def init_db():
     # you will have to import them first before calling init_db()
     # ~ Base.metadata.drop_all(bind=engine)
     # ~ RecommItem.__table__.drop(engine)
-    RecommUser.__table__.drop(engine)
+    # ~ RecommUser.__table__.drop(engine)
     Base.metadata.create_all(bind=engine)
     # ~ fill_recomm_entity()
 
