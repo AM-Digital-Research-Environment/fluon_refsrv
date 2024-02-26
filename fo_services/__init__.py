@@ -1,6 +1,7 @@
 import logging
 import os
 import tomllib
+logger = logging.getLogger(__name__)
 
 from flask import Flask, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -10,16 +11,14 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from fo_services.LDAPAuthClient import LDAPAuthClient, LDAPExtension
 from flask_login import LoginManager
 
-import logging
-logger = logging.getLogger(__name__)
 
 from .kgstuff import KGHandler
 
-
 LDAP = LDAPExtension()
-KGHandler = KGHandler()
+KG = KGHandler()
 
 def create_app(test_config=None):
+    global KG
     app = Flask(__name__)
     app.logger.setLevel(logging.DEBUG)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
@@ -53,15 +52,15 @@ def create_app(test_config=None):
     def shutdown_session(exception=None):
         db_session.remove()
 
-    from .auth import bp as auth
-    from .app_test_v1 import bp as recommender
-    from .app_v1 import bp as api
-
     with app.open_resource("config/ldap.toml") as f:
         ldap_config = tomllib.load(f)
 
     LDAP.init_app(app, ldap_config)
-    KGHandler.load_shit()
+    KG.load_shit()
+
+    from .auth import bp as auth
+    from .api_recommendations_v1 import bp as recommender
+    from .api_app_v1 import bp as api
 
     app.register_blueprint(auth)
     app.register_blueprint(api)

@@ -19,7 +19,7 @@ RUN groupadd -g 999 python \
     && useradd -r -u 999 -g python python
 
 RUN mkdir /app /app/instance \
-    && chown python:python /app /app/instance
+    && chown python:python /app /app/instance && chmod u+w /app/instance
 WORKDIR /app
 
 COPY --chown=python:python --from=build /app/venv ./venv

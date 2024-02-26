@@ -12,14 +12,14 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert
 
 # ~ engine = create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"], echo=True)
-engine = create_engine("postgresql://fo_services:fo_services@db/fo_services", echo=True)
+engine = create_engine("postgresql://fo_services:fo_services@db/fo_services", echo=False)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 
-from .models import User, RecommUser, RecommItem
+from .models import User, RecommUser, RecommItem, InteractionHistory
 
 def fill_recomm_entity(entity_file, sep=' '):
     with open(entity_file, 'r') as _in:
@@ -36,6 +36,7 @@ def fill_recomm_entity(entity_file, sep=' '):
             stmt = insert(RecommItem.__table__).values(wisski_id=_wid, recomm_id=_id).on_conflict_do_nothing()
             db_session.execute(stmt)
             db_session.commit()
+    # ~ logger.debug(f"finished importing entities from {entity_file}")
             
 
 def init_db():
@@ -44,7 +45,7 @@ def init_db():
     # you will have to import them first before calling init_db()
     # ~ Base.metadata.drop_all(bind=engine)
     # ~ RecommItem.__table__.drop(engine)
-    # ~ RecommUser.__table__.drop(engine)
+    # ~ InteractionHistory.__table__.drop(engine)
     Base.metadata.create_all(bind=engine)
 
 def get_user(username):
@@ -81,6 +82,16 @@ def get_recomm_id_for_wisski_user(wisski_user):
         logger.debug(f"created mapping for wisski user {wisski_user}->{new_id}")
         return new_user.recomm_id
     return -1
+
+def log_user_detail_interaction(wisski_user, wisski_item):
+    try:
+        db_session.add(InteractionHistory(int(wisski_user), int(wisski_item)))
+        db_session.commit()
+        return True
+    except Exception as e:
+        logger.debug("error in logging interaction history: "+repr(e))
+        pass
+    return False
 
 def get_n_dummy_users():
     test_file = '/data/test.txt'
