@@ -46,7 +46,6 @@ def init_db():
     # ~ RecommItem.__table__.drop(engine)
     # ~ RecommUser.__table__.drop(engine)
     Base.metadata.create_all(bind=engine)
-    # ~ fill_recomm_entity()
 
 def get_user(username):
     try:

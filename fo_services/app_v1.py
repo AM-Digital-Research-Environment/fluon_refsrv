@@ -353,3 +353,77 @@ class DetailResults(Resource):
 
         return DetailResponse(meta=meta)
 
+
+
+recommendations = api.namespace(
+    "Recommendations",
+    path="/recommend",
+    description="Endpoints for retrieving a list of recommendations for a given user id",
+)
+
+recommendationsPayload = api.model(
+    "Query payload",
+    {
+        "user": fields.String(
+            required=False,
+            description=(
+                "The Drupal user-ID of a logged-in user. Can be empty if the"
+                " user is anonymous."
+            ),
+            example="42",
+        )
+    },
+)
+
+
+class RecommendationResponse(object):
+    def __init__(self, recommendation) -> None:
+        self.recommendation = recommendation
+
+
+recommObject = api.model(
+    "recommend",
+    {
+        "recommendation": fields.String(
+            required=True,
+            description="a comma separated list of wisski entitiy ids",
+            example="1,2,3,4",
+        )
+    },
+)
+
+recommendations_doc = (
+    "Retrieve a list of recommendations for a given user."
+)
+
+
+@recommendations.route("/", doc={"description": recommendations_doc})
+class Recommendation(Resource):
+    @auth.login_required
+    @recommendations.expect(recommendationsPayload)
+    @recommendations.marshal_with(recommObject)
+    @recommendations.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            "user",
+            type=str,
+            default="",
+            help=(
+                "The user-ID of the Drupal-user retrieving a recommendation. May be"
+                " empty for anonymous users"
+            ),
+        )
+        args = parser.parse_args()
+        recommendation = KGHandler.recommend_me_something(args.user)
+        
+        flog.info(
+            _(
+                module="recommendation",
+                http_user=auth.current_user(),
+                user=args["user"],
+                recommendation=recommendation,
+            )
+        )
+
+        return RecommendationResponse(recommendation=recommendation)
