@@ -59,11 +59,11 @@ def create_app(test_config=None):
     KG.load_shit()
 
     from .auth import bp as auth
-    from .api_recommendations_v1 import bp as recommender
     from .api_app_v1 import bp as api
+    from .api_maintenance_v1 import bp as maintenance
 
     app.register_blueprint(auth)
     app.register_blueprint(api)
-    app.register_blueprint(recommender)
+    app.register_blueprint(maintenance)
 
     return app

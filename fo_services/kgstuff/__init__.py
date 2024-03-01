@@ -4,111 +4,116 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 
-from ..db import get_wisski_id_for_rec_id, get_recomm_id_for_wisski_user, fill_recomm_entity
+from ..db import is_new_user, update_model_infos, export_user_data, export_interaction_data, get_itemlist_from_model, get_itemlist_from_cluster
 
 import os
-import sys
-sys.path.insert(0,'/app/fo_services/kgstuff/kgat_pytorch')
-
-
-from data_loader.loader_kgat import DataLoaderKGAT
-from model.KGAT import KGAT
-from utils.model_helper import *
 
 
 class KGHandler():
   
-  def load_entities_if_necessary(self, entity_file):
-    mtime_file = f'/app/{os.path.basename(entity_file)}.mtime'
-    if not os.path.exists(mtime_file):
-      last_check = 0.0
-    else:
-      with open(mtime_file, 'r') as _mtime:
-        last_check = float(_mtime.readline().strip())
-    
-    timestamp = os.path.getmtime(entity_file)
-    if last_check < timestamp:
-      logger.debug(f"entites seem to have changed. reloading entities from {entity_file}")
-      with open(mtime_file, 'w') as _mtime:
-        print(timestamp, file=_mtime)
-      fill_recomm_entity(entity_file) 
-  
-  
   def __init__(self):
-    # we want to mimic the self.args-Object here without calling parse_self.args...
+    # we want to mimic the self.args-Object here without calling parse_self...
     # https://stackoverflow.com/a/2827734
-    self.args = lambda:None
-    self.args.seed = 2024
-    self.args.data_dir = '/'
-    self.args.data_name = 'data'
-    self.args.use_pretrain = 2
-    self.args.pretrain_model_path = f'{self.args.data_dir}/{self.args.data_name}/model.pth'
-    self.args.pretrain_embedding_dir = f'{self.args.data_dir}/{self.args.data_name}/'
-    self.args.cf_batch_size = 1024 
-    self.args.kg_batch_size = 2048 
-    self.args.test_batch_size = 10000 
-    self.args.embed_dim = 64 
-    self.args.relation_dim = 64 
-    self.args.laplacian_type = 'random-walk'
-    self.args.aggregation_type = 'bi-interaction'
-    self.args.conv_dim_list = '[64, 32, 16]'
-    self.args.mess_dropout = '[0.1,0.1,0.1]'
-    self.args.kg_l2loss_lambda = 1e-5
-    self.args.cf_l2loss_lambda = 1e-5
-    self.args.lr = 0.0001
-    self.args.n_epoch = 10 
-    self.args.stopping_steps = 50 
-    self.args.cf_print_every = 1
-    self.args.kg_print_every = 1
-    self.args.evaluate_every = 10
-    self.args.Ks = '[10]'
+    self.data_dir = '/'
+    self.data_name = 'data'
+    
+    
+  def fill_sample_users(self):
+    # for testing purposes: fill db with random user info
+    import os, random
+    from ..db import db_session, Base, engine
+    from ..models import InteractionHistory, RecommUser, UserRecommendationModel, ItemClusterInfo
+    
+    try:
+        UserRecommendationModel.__table__.drop(engine)
+        InteractionHistory.__table__.drop(engine)
+        RecommUser.__table__.drop(engine)
+        ItemClusterInfo.__table__.drop(engine)
+    except:
+        pass
+    Base.metadata.create_all(bind=engine)
+    
+    N = 100
+    recomm_file = f'{self.data_dir}/{self.data_name}/recommendations.csv'
+    if os.path.exists(recomm_file):
+        with open(recomm_file, 'rb') as f:
+            try:  # catch OSError in case of a one line file 
+                f.seek(-2, os.SEEK_END)
+                while f.read(1) != b'\n':
+                    f.seek(-2, os.SEEK_CUR)
+            except OSError:
+                f.seek(0)
+            last_line = f.readline().decode()
+            N = int(last_line.split(' ')[0])+1
+    logger.warning(f"remember: I am creating {N} dummy users right now in KGHandler.fill_sample_data!")
+    
+    for u in range(N):
+        db_session.add(RecommUser(u))
+    db_session.commit()
+    return N
+    
+  def fill_sample_interactions(self, n_users, n_interact_min,n_interact_max):
+      # for testing purposes: fill db with random user info
+    import os, random
+    from ..db import db_session, Base, engine
+    from ..models import InteractionHistory
+    items = []
+    with open(f'{self.data_dir}/{self.data_name}/items_id.txt', 'r') as f:
+        field = f.readline().strip().split(' ')[2]
+        if field != 'wisskiid':
+            raise Exception("Deep Shit Error Code")
+        for line in f:
+            items.append(int(line.strip().split(' ')[2]))
+    
+    for u in range(n_users):
+        n = random.choice(range(n_interact_min,n_interact_max+1))
+        interactions = random.sample(items, k=n)
+        for i in interactions:
+            db_session.add(InteractionHistory(u, i))
+        
+    db_session.commit()
   
   def load_shit(self): 
     # import recommendable items to database
-    self.load_entities_if_necessary(f'{self.args.data_dir}/{self.args.data_name}/items_id.txt') 
-     
-    torch.manual_seed(self.args.seed)# GPU / CPU
-    self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # load data
-    self.data = DataLoaderKGAT(self.args, logging)
+    # ~ self.N = self.fill_sample_users()
     
-    # load model
-    self.model = KGAT(self.args, self.data.n_users, self.data.n_entities, self.data.n_relations)
-    self.model = load_model(self.model, self.args.pretrain_model_path)
-    self.model.to(self.device)
-    self.evaluate(self.data.n_items, self.data.test_batch_size, self.data.test_user_dict)
-  
-  def evaluate(self,  n_items, test_batch_size, test_user_dict):
-    self.model.eval()
+    # ~ n_interact_min = 10
+    # ~ n_interact_max = 50
+    # ~ self.fill_sample_interactions(self.N,n_interact_min,n_interact_max)
+    pass
 
-    user_ids = list(test_user_dict.keys())
-    user_ids_batches = [user_ids[i: i + test_batch_size] for i in range(0, len(user_ids), test_batch_size)]
-    user_ids_batches = [torch.LongTensor(d) for d in user_ids_batches]
+  def reload_data(self):
+    clu_file = f'{self.data_dir}/{self.data_name}/cluster.csv'
+    rec_file = f'{self.data_dir}/{self.data_name}/recommendations.csv'
+    res = update_model_infos(clu_file, rec_file)
+    
+    # ~ n_interact_min = 10
+    # ~ n_interact_max = 50
+    # ~ self.fill_sample_interactions(self.N,n_interact_min,n_interact_max)
+    
+    return res
 
-    item_ids = torch.arange(n_items, dtype=torch.long).to(self.device)
+  def export_user_data(self):
+    usr_file = '/app/known_users.tsv'
+    export_user_data(usr_file)
+    return usr_file
 
-    for batch_user_ids in user_ids_batches:
-        batch_user_ids = batch_user_ids.to(self.device)
-        
-        with torch.no_grad():
-            batch_scores = self.model(batch_user_ids, item_ids, mode='predict')       # (n_batch_users, n_items)
+  def export_interaction_data(self):
+    intr_file = '/app/user_interactions.tsv'
+    export_interaction_data(intr_file)
+    return intr_file
 
-        batch_scores = batch_scores.cpu()
-        print("batch_scores.shape:",batch_scores.shape)
-        
-        try:
-            _, rank_indices = torch.sort(batch_scores.cuda(), descending=True)    # try to speed up the sorting process
-        except:
-            _, rank_indices = torch.sort(batch_scores, descending=True)
-        self.rank_indices = rank_indices.cpu()
-        print("rank_indices.shape:", self.rank_indices.shape)
-        
-
-  def recommend_me_something(self,user_id):
+  def recommend_me_something(self,user_id,max_n,start_at):
     u = int(user_id)
-    r_id = get_recomm_id_for_wisski_user(u)
-    logger.debug(f"recommending something for wisski user {user_id} ({r_id})")
-    if r_id < self.rank_indices.shape[0]:
-      return [get_wisski_id_for_rec_id(i) for i in self.rank_indices[u,:].tolist()]
-    return "1,2,3,4,5,6,10"
+    if start_at > 0:
+        max_n += start_at
+    if is_new_user(u):
+        recs = get_itemlist_from_cluster(10)
+        logger.debug(f"get itemlist from cluster: {recs}")
+    else:
+        recs = get_itemlist_from_model(u, max_n)
+        logger.debug(f"get itemlist from model: {recs}")
+    if start_at > 0:
+        recs = recs[start_at:len(recs)]
+    logger.debug(f"recommending something for wisski user {user_id}")
+    return ','.join(str(r[0]) for r in recs)
