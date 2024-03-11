@@ -58,11 +58,13 @@ def create_app(test_config=None):
     LDAP.init_app(app, ldap_config)
     KG.load_shit()
 
-    from .auth import bp as auth
+    from .page_auth import bp as auth
+    from .page_clustervis import bp as clustervis
     from .api_app_v1 import bp as api
     from .api_maintenance_v1 import bp as maintenance
 
     app.register_blueprint(auth)
+    app.register_blueprint(clustervis)
     app.register_blueprint(api)
     app.register_blueprint(maintenance)
 

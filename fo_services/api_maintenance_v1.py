@@ -4,7 +4,7 @@ import os
 
 from flask import Flask, Blueprint, session, g, send_from_directory
 from flask_httpauth import HTTPBasicAuth
-from .auth import check_login
+from .page_auth import check_login
 from . import KG
 
 from flask_restx import Api, Resource, fields, reqparse

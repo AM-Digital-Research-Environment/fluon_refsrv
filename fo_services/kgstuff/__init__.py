@@ -33,7 +33,7 @@ class KGHandler():
         pass
     Base.metadata.create_all(bind=engine)
     
-    N = 100
+    N = 3
     recomm_file = f'{self.data_dir}/{self.data_name}/recommendations.csv'
     if os.path.exists(recomm_file):
         with open(recomm_file, 'rb') as f:

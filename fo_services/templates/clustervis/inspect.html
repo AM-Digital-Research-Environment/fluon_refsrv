@@ -1,0 +1,20 @@
+{% extends '_base.html' %}
+
+{% block header %}
+    <h2 class="text-xl mb-4">{% block title %}{{ title }}{% endblock %}</h2>
+    <div>
+        <u>Stats:</u><br/>
+        Items clustered: {{stats.n_items}}; number of clusters: {{ stats.n_clusters }}; number of outliers: {{ stats.n_outliers}}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <p>&nbsp;</p>
+    
+    <h4 class="text-xl mb-4">Reachability Plot</h4>
+    <img src="cluster_vis.png" alt="my plot">
+    <p>&nbsp;</p>
+    
+    <h4 class="text-xl mb-4">Silhouette Coefficient</h4>
+    <img src="cluster_silhouette.png" alt="my plot">
+{% endblock %}
