@@ -108,10 +108,14 @@ class KGHandler():
         max_n += start_at
     if is_new_user(u):
         recs = get_itemlist_from_cluster(10)
-        logger.debug(f"get itemlist from cluster: {recs}")
+        logger.debug(f"new user. get itemlist from cluster: {recs}")
     else:
         recs = get_itemlist_from_model(u, max_n)
-        logger.debug(f"get itemlist from model: {recs}")
+        if len(recs) == 0:
+            recs = get_itemlist_from_cluster(10)
+            logger.debug(f"known user. no recommendations. get itemlist from cluster: {recs}")
+        else:
+            logger.debug(f"known user. get itemlist from model: {recs}")
     if start_at > 0:
         recs = recs[start_at:len(recs)]
     logger.debug(f"recommending something for wisski user {user_id}")
