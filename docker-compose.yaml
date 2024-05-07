@@ -26,21 +26,21 @@ services:
       - db:/var/lib/postgresql/data
     networks:
       - backbone
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: fo_pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "bla@fasel.com"
-      PGADMIN_DEFAULT_PASSWORD: 123
-    depends_on:
-      - db
-    networks:
-      - backbone
-    ports:
-      - "8888:80"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+  #~ pgadmin:
+    #~ image: dpage/pgadmin4
+    #~ container_name: fo_pgadmin
+    #~ restart: always
+    #~ environment:
+      #~ PGADMIN_DEFAULT_EMAIL: "bla@fasel.com"
+      #~ PGADMIN_DEFAULT_PASSWORD: 123
+    #~ depends_on:
+      #~ - db
+    #~ networks:
+      #~ - backbone
+    #~ ports:
+      #~ - "8888:80"
+    #~ volumes:
+      #~ - pgadmin-data:/var/lib/pgadmin
 
 volumes:
   instance: {}
