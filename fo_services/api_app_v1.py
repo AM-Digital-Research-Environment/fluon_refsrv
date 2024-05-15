@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import logging
 
-from flask import Flask, Blueprint, session, g
+from flask import Flask, Blueprint, request, session, g
 from flask_httpauth import HTTPBasicAuth
 from .page_auth import check_login
 from . import KG
@@ -357,33 +357,6 @@ recommendations = api.namespace(
     description="Endpoints for retrieving a list of recommendations for a given user id",
 )
 
-queryPayload = api.model(
-    "Query payload",
-    {
-        "user": fields.String(
-            required=True,
-            description=(
-                "The Drupal user-ID of a logged-in user. Can be empty if the"
-                " user is anonymous."
-            ),
-            example="42",
-        ),
-        "n": fields.Integer(
-            required=False,
-            description=("The number of items you want to have recommended."),
-            example="10",
-        ),
-        "start_at": fields.Integer(
-            required=False,
-            description=(
-                "In case of subsequent calls, provide a starting point"
-                "to avoid duplicated recommendations"
-            ),
-            example="0",
-        ),
-    },
-)
-
 
 class RecommendationResponse(object):
     def __init__(self, items) -> None:
@@ -417,6 +390,7 @@ recommendations_doc = "Retrieve a list of recommendations for a given user."
 @recommendations.param(
     "user_id",
     "The user-ID of the Drupal-user retrieving a recommendation. May be empty for anonymous users.",
+    _in="query",
 )
 class Recommendation(Resource):
     @auth.login_required
@@ -424,7 +398,11 @@ class Recommendation(Resource):
     @recommendations.response(
         401, "Unauthorized", headers={"www-authenticate": "auth prompt"}
     )
-    def get(self, user_id: str, n: int = 10, offset: int = 0):
+    def get(self):
+        user_id = request.args.get("user_id", "")
+        n = request.args.get("n", 10, type=int)
+        offset = request.args.get("offset", 0, type=int)
+
         items = KG.recommend_me_something(user_id, n, offset)
 
         flog.info(
