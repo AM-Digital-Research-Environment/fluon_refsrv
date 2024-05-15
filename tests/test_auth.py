@@ -13,9 +13,7 @@ def test_register(client: FlaskClient, app: Flask):
     response = client.post("/auth/user/create", data={"username": "a", "password": "a"})
 
     with app.app_context():
-        assert (
-            get_user('a') is not None
-        )
+        assert get_user("a") is not None
 
 
 @pytest.mark.parametrize(

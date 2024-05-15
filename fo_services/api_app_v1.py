@@ -15,15 +15,18 @@ from .db import log_user_detail_interaction
 bp = Blueprint("api", __name__, url_prefix="/api/v1")
 
 import logging
+
 flog = logging.getLogger(__name__)
 
 auth = HTTPBasicAuth()
+
+
 @auth.verify_password
 def verify_password(the_user, password):
     flog.info(f"trying to login {the_user}")
     success, known_user = check_login(the_user, password)
     if success:
-      return known_user.name
+        return known_user.name
     return None
 
 
@@ -348,7 +351,6 @@ class DetailResults(Resource):
         return DetailResponse(meta=meta)
 
 
-
 recommendations = api.namespace(
     "Recommendations",
     path="/recommend",
@@ -368,9 +370,7 @@ queryPayload = api.model(
         ),
         "n": fields.Integer(
             required=False,
-            description=(
-                "The number of items you want to have recommended."
-            ),
+            description=("The number of items you want to have recommended."),
             example="10",
         ),
         "start_at": fields.Integer(
@@ -401,9 +401,7 @@ recommObject = api.model(
     },
 )
 
-recommendations_doc = (
-    "Retrieve a list of recommendations for a given user."
-)
+recommendations_doc = "Retrieve a list of recommendations for a given user."
 
 
 @recommendations.route("/", doc={"description": recommendations_doc})

@@ -17,6 +17,7 @@ from fo_services.db import db_session, get_user
 from fo_services.models import User
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -29,7 +30,7 @@ def check_login(username, password):
     else:
         client = LDAP.get_client()
         success = client.auth(username, password)
-    
+
         if success:
             known_user = get_user(username)
             if known_user is None:
@@ -38,13 +39,16 @@ def check_login(username, password):
                     db_session.add(known_user)
                     db_session.commit()
                 except:
-                    logging.info(f"cant add {username} to the db during login as it is already registered")
+                    logging.info(
+                        f"cant add {username} to the db during login as it is already registered"
+                    )
     if success:
         g.user = known_user
         session.clear()
         session["user_id"] = username
-        return (True,known_user)
+        return (True, known_user)
     return (False, None)
+
 
 @bp.route("/user/create", methods=("GET", "POST"))
 def create_user():
@@ -77,9 +81,9 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        
-        success,known_user = check_login(username, password)
-            
+
+        success, known_user = check_login(username, password)
+
         if success:
             g.user = known_user
             session.clear()
@@ -98,7 +102,7 @@ def login():
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get("user_id")
-    logger.debug('load user for id '+str(user_id))
+    logger.debug("load user for id " + str(user_id))
 
     if user_id is None:
         g.user = None

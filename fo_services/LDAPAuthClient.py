@@ -200,9 +200,11 @@ class LDAPAuthClient:
             logger.info(
                 "LDAP bind failed for %s: %s",
                 bind_dn,
-                self.connection.result["description"]
-                if self.connection.result
-                else self.connection.last_error,
+                (
+                    self.connection.result["description"]
+                    if self.connection.result
+                    else self.connection.last_error
+                ),
             )
             self.connection.unbind()
             return False, None

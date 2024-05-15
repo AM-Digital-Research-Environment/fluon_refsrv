@@ -5,6 +5,7 @@ import datetime
 
 from ..db import Base
 
+
 class User(Base):
     __tablename__  = 'user'
     id           :  Mapped[int]                 =   mapped_column(primary_key=True,autoincrement=True)
@@ -18,7 +19,7 @@ class User(Base):
         self.name = name
         self.is_ldap_user = is_ldap_user
         self.password = password
-        
+
 
 class RecommUser(Base):
     __tablename__  = 'rec_user'
@@ -28,6 +29,7 @@ class RecommUser(Base):
     
     def __init__(self, wisski_id):
         self.wisski_id = wisski_id
+
 
 class InteractionHistory(Base):
     __tablename__  = 'hist_interact'
@@ -40,6 +42,7 @@ class InteractionHistory(Base):
         self.wisski_user = wisski_user
         self.wisski_item = wisski_item
 
+
 class ItemClusterInfo(Base):
     __tablename__ = 'item_cluster'
     id           :  Mapped[int]                 =   mapped_column(primary_key=True, autoincrement=True)
@@ -48,7 +51,7 @@ class ItemClusterInfo(Base):
     # ~ among_top5   :  Mapped[bool]                =   mapped_column(unique=False, default=False)
     # ~ among_top10  :  Mapped[bool]                =   mapped_column(unique=False, default=False)
     # ~ among_top50  :  Mapped[bool]                =   mapped_column(unique=False, default=False)
-    
+
     def __init__(self, _id, _cls, _rnk):
         self.id = _id
         self.cluster = _cls
@@ -56,6 +59,7 @@ class ItemClusterInfo(Base):
         # ~ self.among_top5 = _rnk < 5
         # ~ self.among_top10 = _rnk < 10
         # ~ self.among_top50 = _rnk < 50
+
 
 class UserRecommendationModel(Base):
     __tablename__ = 'user_recommendation_model'

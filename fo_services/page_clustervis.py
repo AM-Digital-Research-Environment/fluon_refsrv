@@ -13,6 +13,7 @@ from flask import (
 )
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 from joblib import load
@@ -22,40 +23,45 @@ import random
 
 bp = Blueprint("clustervis", __name__, url_prefix="/clustervis")
 
-@bp.route('/inspect', methods=["GET"])
+
+@bp.route("/inspect", methods=["GET"])
 def inspect():
     if g.user is None:
         return redirect(url_for("auth.login"))
-    if 'has_cluster_data' not in session:
+    if "has_cluster_data" not in session:
         load_cluster_data()
-    if session['has_cluster_data']:
+    if session["has_cluster_data"]:
         title = "Inspect Clustering"
     else:
         title = "I need data!"
-    return render_template('clustervis/inspect.html', title=title, stats=session['stats'])
+    return render_template(
+        "clustervis/inspect.html", title=title, stats=session["stats"]
+    )
 
 
-@bp.route('/cluster_vis.png')
+@bp.route("/cluster_vis.png")
 def plot_cluster_vis():
-    if session['has_cluster_data']:
-        with open('/data/plots/cluster_vis_reachability.png', "rb") as fh:
+    if session["has_cluster_data"]:
+        with open("/data/plots/cluster_vis_reachability.png", "rb") as fh:
             output = io.BytesIO(fh.read())
     else:
         fig = create_random_plot()
         output = io.BytesIO()
         FigureCanvas(fig).print_png(output)
-    return Response(output.getvalue(), mimetype='image/png')
+    return Response(output.getvalue(), mimetype="image/png")
 
-@bp.route('/cluster_silhouette.png')
+
+@bp.route("/cluster_silhouette.png")
 def plot_cluster_silhouette():
-    if session['has_cluster_data']:
-        with open('/data/plots/cluster_vis_silhouette.png', "rb") as fh:
+    if session["has_cluster_data"]:
+        with open("/data/plots/cluster_vis_silhouette.png", "rb") as fh:
             output = io.BytesIO(fh.read())
     else:
         fig = create_random_plot()
         output = io.BytesIO()
         FigureCanvas(fig).print_png(output)
-    return Response(output.getvalue(), mimetype='image/png')
+    return Response(output.getvalue(), mimetype="image/png")
+
 
 def create_random_plot():
     fig = Figure()
@@ -69,8 +75,8 @@ def create_random_plot():
 
 def load_cluster_data():
     logger.debug("reloading actual data")
-    session['stats'] = load('/data/cluster_stats.joblib')
-    session['has_cluster_data'] = True
+    session["stats"] = load("/data/cluster_stats.joblib")
+    session["has_cluster_data"] = True
     flash("Reloading data successful", "success")
 
 

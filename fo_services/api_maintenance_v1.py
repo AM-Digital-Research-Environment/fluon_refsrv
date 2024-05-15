@@ -13,15 +13,18 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 bp = Blueprint("maintenance", __name__, url_prefix="/maintenance/v1")
 
 import logging
+
 flog = logging.getLogger(__name__)
 
 auth = HTTPBasicAuth()
+
+
 @auth.verify_password
 def verify_password(the_user, password):
     flog.info(f"trying to login {the_user}")
     success, known_user = check_login(the_user, password)
     if success:
-      return known_user.name
+        return known_user.name
     return None
 
 
@@ -40,7 +43,9 @@ api = Api(
     bp,
     version="1.0",
     title="Maintenance API",
-    description=("Endpoints to trigger database updates and retrieve files required to train models."),
+    description=(
+        "Endpoints to trigger database updates and retrieve files required to train models."
+    ),
     authorizations={"basicAuth": {"type": "basic"}},
     security="basic",
 )
@@ -67,9 +72,9 @@ resultObject = api.model(
         )
     },
 )
-update_doc = (
-    "Trigger reloading catalog information from KG model."
-)
+update_doc = "Trigger reloading catalog information from KG model."
+
+
 @db.route("/update", doc={"description": update_doc})
 class Updater(Resource):
     @auth.login_required
@@ -80,31 +85,31 @@ class Updater(Resource):
         return DbResponse(result=result)
 
 
+export_user_doc = "Trigger exporting user information from DB."
 
-export_user_doc = (
-    "Trigger exporting user information from DB."
-)
+
 @db.route("/export_users", doc={"description": export_user_doc})
 class ExporterUser(Resource):
     @auth.login_required
     @db.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
-    @db.produces(['text/tsv'])
+    @db.produces(["text/tsv"])
     def post(self):
         path = KG.export_user_data()
-        return send_from_directory(os.path.dirname(path),
-                                   os.path.basename(path),
-                                   as_attachment=True)
+        return send_from_directory(
+            os.path.dirname(path), os.path.basename(path), as_attachment=True
+        )
 
-export_interaction_doc = (
-    "Trigger exporting interaction information from DB."
-)
+
+export_interaction_doc = "Trigger exporting interaction information from DB."
+
+
 @db.route("/export_interactions", doc={"description": export_user_doc})
 class ExporterInteractions(Resource):
     @auth.login_required
     @db.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
-    @db.produces(['text/tsv'])
+    @db.produces(["text/tsv"])
     def post(self):
         path = KG.export_interaction_data()
-        return send_from_directory(os.path.dirname(path),
-                                   os.path.basename(path),
-                                   as_attachment=True)
+        return send_from_directory(
+            os.path.dirname(path), os.path.basename(path), as_attachment=True
+        )

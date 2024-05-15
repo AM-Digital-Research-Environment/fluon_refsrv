@@ -1,6 +1,7 @@
 import logging
 import os
 import tomllib
+
 logger = logging.getLogger(__name__)
 
 from flask import Flask, render_template, flash
@@ -16,6 +17,7 @@ from .kgstuff import KGHandler
 
 LDAP = LDAPExtension()
 KG = KGHandler()
+
 
 def create_app(test_config=None):
     global KG
@@ -46,6 +48,7 @@ def create_app(test_config=None):
         return render_template("index.html")
 
     from .db import db_session, init_db
+
     init_db()
 
     @app.teardown_appcontext
