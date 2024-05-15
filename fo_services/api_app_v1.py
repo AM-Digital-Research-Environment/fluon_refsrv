@@ -380,20 +380,20 @@ queryPayload = api.model(
                 "to avoid duplicated recommendations"
             ),
             example="0",
-        )
+        ),
     },
 )
 
 
 class RecommendationResponse(object):
-    def __init__(self, recommendation) -> None:
-        self.recommendation = recommendation
+    def __init__(self, items) -> None:
+        self.items = items
 
 
-recommObject = api.model(
-    "recommend",
+recommendationResponse = api.model(
+    "Recommendations",
     {
-        "recommendation": fields.String(
+        "items": fields.String(
             required=True,
             description="a comma separated list of wisski entitiy ids",
             example="1,2,3,4",
@@ -405,48 +405,35 @@ recommendations_doc = "Retrieve a list of recommendations for a given user."
 
 
 @recommendations.route("/", doc={"description": recommendations_doc})
+@recommendations.param(
+    "offset",
+    "In case of subsequent calls, provide a starting point to avoid duplicated recommendations",
+    _in="query",
+    default=0,
+)
+@recommendations.param(
+    "n", "The number of items you want to have recommended.", _in="query", default=10
+)
+@recommendations.param(
+    "user_id",
+    "The user-ID of the Drupal-user retrieving a recommendation. May be empty for anonymous users.",
+)
 class Recommendation(Resource):
     @auth.login_required
-    @recommendations.expect(queryPayload)
-    @recommendations.marshal_with(recommObject)
-    @recommendations.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            "user",
-            type=str,
-            default="",
-            help=(
-                "The user-ID of the Drupal-user retrieving a recommendation. May be"
-                " empty for anonymous users"
-            ),
-        )
-        parser.add_argument(
-            "n",
-            type=int,
-            help=(
-                "The number of items you want to have recommended."
-            ),
-        )
-        parser.add_argument(
-            "start_at",
-            type=int,
-            help=(
-                "In case of subsequent calls, provide a starting point"
-                "to avoid duplicated recommendations"
-            ),
-        )
-        args = parser.parse_args()
-        recommendation = KG.recommend_me_something(args.user, args.n, args.start_at)
-        
+    @recommendations.marshal_with(recommendationResponse)
+    @recommendations.response(
+        401, "Unauthorized", headers={"www-authenticate": "auth prompt"}
+    )
+    def get(self, user_id: str, n: int = 10, offset: int = 0):
+        items = KG.recommend_me_something(user_id, n, offset)
+
         flog.info(
             _(
                 module="recommendation",
                 http_user=auth.current_user(),
-                user=args["user"],
-                recommendation=recommendation,
+                user=user_id,
+                recommendation=items,
             )
         )
 
-        return RecommendationResponse(recommendation=recommendation)
-
+        return RecommendationResponse(items=items)
