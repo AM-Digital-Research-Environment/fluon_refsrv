@@ -42,28 +42,35 @@ def get_user(username):
     return None
 
 
-def is_new_user(wisski_user):
+def is_new_user(wisski_user_id: str) -> bool:
+    # an anonymous user should be handled as new
+    if len(wisski_user_id) == 0:
+        return True
+
     is_new = True
+
     try:
         db_session.query(RecommUser.wisski_id).filter(
-            RecommUser.wisski_id == wisski_user
+            RecommUser.wisski_id == wisski_user_id
         ).one()
         is_new = False
     except:
         pass
+
     if not is_new:
         try:
-            logger.debug(f"looking for recommendations for {wisski_user}")
+            logger.debug(f"looking for recommendations for {wisski_user_id}")
             db_session.query(UserRecommendationModel.user).filter(
-                UserRecommendationModel.user == wisski_user
+                UserRecommendationModel.user == wisski_user_id
             ).all()
-            logger.debug(f"found recommendations for {wisski_user}")
+            logger.debug(f"found recommendations for {wisski_user_id}")
         except:
             is_new = True
     else:
-        db_session.add(RecommUser(wisski_user))
+        db_session.add(RecommUser(wisski_user_id))
         db_session.commit()
-        logger.debug(f"added new user {wisski_user}")
+        logger.debug(f"added new user {wisski_user_id}")
+
     return is_new
 
 
