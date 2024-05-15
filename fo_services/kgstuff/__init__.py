@@ -1,5 +1,3 @@
-import numpy as np
-
 import logging
 from typing import List
 
@@ -7,15 +5,14 @@ logger = logging.getLogger(__name__)
 
 
 from ..db import (
+    export_interaction_data,
+    export_user_data,
+    get_itemlist_from_cluster,
+    get_itemlist_from_model,
     is_new_user,
     update_model_infos,
-    export_user_data,
-    export_interaction_data,
-    get_itemlist_from_model,
-    get_itemlist_from_cluster,
 )
 
-import os
 
 class KGHandler(object):
 
@@ -29,13 +26,13 @@ class KGHandler(object):
 
     def fill_sample_users(self):
         # for testing purposes: fill db with random user info
-        import os, random
-        from ..db import db_session, Base, engine
+        import os
+        from ..db import Base, db_session, engine
         from ..models import (
             InteractionHistory,
+            ItemClusterInfo,
             RecommUser,
             UserRecommendationModel,
-            ItemClusterInfo,
         )
 
         try:
@@ -70,8 +67,9 @@ class KGHandler(object):
 
     def fill_sample_interactions(self, n_users, n_interact_min, n_interact_max):
         # for testing purposes: fill db with random user info
-        import os, random
-        from ..db import db_session, Base, engine
+        import random
+
+        from ..db import db_session
         from ..models import InteractionHistory
 
         items = []
