@@ -366,10 +366,11 @@ class RecommendationResponse(object):
 recommendationResponse = api.model(
     "Recommendations",
     {
-        "items": fields.String(
+        "items": fields.List(
+            fields.String,
             required=True,
             description="a comma separated list of wisski entitiy ids",
-            example="1,2,3,4",
+            example=["1", "3", "9"],
         )
     },
 )

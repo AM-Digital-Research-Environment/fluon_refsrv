@@ -1,8 +1,10 @@
 import numpy as np
 
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
+
 
 from ..db import (
     is_new_user,
@@ -15,8 +17,9 @@ from ..db import (
 
 import os
 
+class KGHandler(object):
 
-class KGHandler:
+    NUM_DEFAULT_RECOMMENDATIONS = 10
 
     def __init__(self):
         # we want to mimic the self.args-Object here without calling parse_self...
@@ -117,23 +120,28 @@ class KGHandler:
         export_interaction_data(intr_file)
         return intr_file
 
-    def recommend_me_something(self, user_id: str, max_n: int, offset: int):
-        u = int(user_id)
+    def recommend_me_something(
+        self, user_id: str, max_n: int, offset: int
+    ) -> List[str]:
         if offset > 0:
             max_n += offset
-        if is_new_user(u):
-            recs = get_itemlist_from_cluster(10)
-            logger.debug(f"new user. get itemlist from cluster: {recs}")
+
+        if is_new_user(user_id):
+            reco_items = get_itemlist_from_cluster(self.NUM_DEFAULT_RECOMMENDATIONS)
+            logger.debug(f"new user. get itemlist from cluster: {reco_items}")
         else:
-            recs = get_itemlist_from_model(u, max_n)
-            if len(recs) == 0:
-                recs = get_itemlist_from_cluster(10)
+            reco_items = get_itemlist_from_model(user_id, max_n)
+            if len(reco_items) == 0:
+                reco_items = get_itemlist_from_cluster(self.NUM_DEFAULT_RECOMMENDATIONS)
                 logger.debug(
-                    f"known user. no recommendations. get itemlist from cluster: {recs}"
+                    f"known user. no recommendations. get itemlist from cluster: {reco_items}"
                 )
             else:
-                logger.debug(f"known user. get itemlist from model: {recs}")
+                logger.debug(f"known user. get itemlist from model: {reco_items}")
+
         if offset > 0:
-            recs = recs[offset : len(recs)]
+            reco_items = reco_items[offset : len(reco_items)]
+
         logger.debug(f"recommending something for wisski user {user_id}")
-        return ",".join(str(r[0]) for r in recs)
+
+        return [r[0] for r in reco_items]
