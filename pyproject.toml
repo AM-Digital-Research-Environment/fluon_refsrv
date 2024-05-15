@@ -5,6 +5,7 @@ description = ""
 authors = ["Oliver Baumann <oliver.baumann@uni-bayreuth.de>"]
 license = "Proprietary"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -21,11 +22,11 @@ flask-sqlalchemy = "^3.1.1"
 venvPath = "/home/ob/000JD/302 DMWG/30-39 Code/302.32__fo_services"
 venv = ".venv"
 
-
 [tool.poetry.group.dev.dependencies]
 pytest-mock = "^3.12.0"
-
 black = "^24.4.2"
+isort = "^5.13.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
