@@ -1,31 +1,41 @@
-FROM python:3.11-slim as build
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends \
-    build-essential gcc
+FROM python:3.12-alpine as build
+
+RUN apk add --no-cache \
+    build-base \
+    linux-headers
 
 WORKDIR /app
-RUN python -m venv /app/venv
+RUN python -m venv venv
 ENV PATH="/app/venv/bin:$PATH"
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml poetry.lock ./
+RUN . ./venv/bin/activate \
+    && pip install poetry \
+    && poetry install --only main --no-root --no-directory
 
-FROM python:3.11-slim@sha256:161a52751dd68895c01350e44e9761e3965e4cef0f983bc5b6c57fd36d7e513c
+COPY src/ ./src
+RUN . ./venv/bin/activate && poetry install --only main
 
-RUN groupadd -g 999 python \
-    && useradd -r -u 999 -g python python
+# FROM python:3.11-slim@sha256:161a52751dd68895c01350e44e9761e3965e4cef0f983bc5b6c57fd36d7e513c
+FROM python:3.12-alpine@sha256:ef097620baf1272e38264207003b0982285da3236a20ed829bf6bbf1e85fe3cb
 
-RUN mkdir /app /app/instance \
-    && chown python:python /app /app/instance
+RUN apk add --no-cache \
+    uwsgi-python3
+RUN addgroup --system python \
+    && adduser --system --no-create-home --ingroup python --uid 1001 python \
+    && mkdir /app /app/instance /app/src /app/mplconfig \
+    && chown --recursive python:python /app /app/instance /app/src /app/mplconfig
+
 WORKDIR /app
 
 COPY --chown=python:python --from=build /app/venv ./venv
-COPY --chown=python:python . .
+# COPY --chown=python:python . .
 
-USER 999
+USER 1001
 
 EXPOSE 5000
 
 ENV PATH="/app/venv/bin:$PATH"
 ENTRYPOINT ["uwsgi"]
+WORKDIR /app/src
 CMD ["--http", "0.0.0.0:5000", "--master", "-p", "4", "-w", "wsgi:app"]

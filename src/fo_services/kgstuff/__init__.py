@@ -119,7 +119,7 @@ class KGHandler(object):
         return intr_file
 
     def recommend_me_something(
-        self, user_id: str, max_n: int, offset: int
+        self, user_id: int, max_n: int, offset: int
     ) -> List[str]:
         if offset > 0:
             max_n += offset

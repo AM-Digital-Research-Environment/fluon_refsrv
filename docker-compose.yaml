@@ -4,11 +4,12 @@ services:
     ports:
       - 5000:5000
     volumes:
-      - ./fo_services:/app/fo_services
-      - ./data:/data
-      - instance:/app/instance/
+      - ./src:/app/src/
+      - ./data:/app/data/
     command: ["--app", "fo_services", "run", "--host", "0.0.0.0", "--debug"]
     entrypoint: ["/app/venv/bin/flask"]
+    environment:
+        MPLCONFIGDIR: "/app/mplconfig"
     networks:
       - backbone
     depends_on:

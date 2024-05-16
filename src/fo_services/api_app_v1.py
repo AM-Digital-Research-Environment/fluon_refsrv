@@ -379,6 +379,7 @@ recommendations_doc = "Retrieve a list of recommendations for a given user."
 
 
 @recommendations.route("/", doc={"description": recommendations_doc})
+@recommendations.route("/<int:user_id>", doc={"description": recommendations_doc})
 @recommendations.param(
     "offset",
     "In case of subsequent calls, provide a starting point to avoid duplicated recommendations",
@@ -388,29 +389,28 @@ recommendations_doc = "Retrieve a list of recommendations for a given user."
 @recommendations.param(
     "n", "The number of items you want to have recommended.", _in="query", default=10
 )
-@recommendations.param(
-    "user_id",
-    "The user-ID of the Drupal-user retrieving a recommendation. May be empty for anonymous users.",
-    _in="query",
-)
 class Recommendation(Resource):
     @auth.login_required
     @recommendations.marshal_with(recommendationResponse)
     @recommendations.response(
         401, "Unauthorized", headers={"www-authenticate": "auth prompt"}
     )
-    def get(self):
-        user_id = request.args.get("user_id", "")
+    def get(self, user_id: int | None = None):
+        # TODO: handle the "empty" case better than with a sentinel value
+        user = user_id
+        if user_id is None:
+            user = -1
+
         n = request.args.get("n", 10, type=int)
         offset = request.args.get("offset", 0, type=int)
 
-        items = KG.recommend_me_something(user_id, n, offset)
+        items = KG.recommend_me_something(user, n, offset)
 
         flog.info(
             _(
                 module="recommendation",
                 http_user=auth.current_user(),
-                user=user_id,
+                user=user,
                 recommendation=items,
             )
         )

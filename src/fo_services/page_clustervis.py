@@ -1,25 +1,24 @@
 import functools
+import io
+import logging
+from pathlib import Path
+import random
 
 from flask import (
     Blueprint,
+    Response,
     flash,
     g,
     redirect,
     render_template,
-    request,
     session,
     url_for,
-    Response,
 )
-
-import logging
+import joblib
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 logger = logging.getLogger(__name__)
-
-from joblib import load
-from pathlib import Path
-import io
-import random
 
 bp = Blueprint("clustervis", __name__, url_prefix="/clustervis")
 
@@ -41,8 +40,9 @@ def inspect():
 
 @bp.route("/cluster_vis.png")
 def plot_cluster_vis():
-    if session["has_cluster_data"]:
-        with open("/data/plots/cluster_vis_reachability.png", "rb") as fh:
+    plot_file = Path("../data/plots/cluster_vis_reachability.png")
+    if plot_file.exists() and session["has_cluster_data"]:
+        with open(plot_file, "rb") as fh:
             output = io.BytesIO(fh.read())
     else:
         fig = create_random_plot()
@@ -53,8 +53,9 @@ def plot_cluster_vis():
 
 @bp.route("/cluster_silhouette.png")
 def plot_cluster_silhouette():
-    if session["has_cluster_data"]:
-        with open("/data/plots/cluster_vis_silhouette.png", "rb") as fh:
+    plot_file = Path("../data/plots/cluster_vis_silhouette.png")
+    if plot_file.exists() and session["has_cluster_data"]:
+        with open(plot_file, "rb") as fh:
             output = io.BytesIO(fh.read())
     else:
         fig = create_random_plot()
@@ -74,8 +75,15 @@ def create_random_plot():
 
 
 def load_cluster_data():
+    cluster_data = Path("../data/cluster_stats.joblib")
+    if not cluster_data.exists():
+        logger.error(f"Cluster data dump at {cluster_data} not found")
+        session["has_cluster_data"] = False
+        session["stats"] = []
+        return
+
     logger.debug("reloading actual data")
-    session["stats"] = load("/data/cluster_stats.joblib")
+    session["stats"] = joblib.load(cluster_data)
     session["has_cluster_data"] = True
     flash("Reloading data successful", "success")
 

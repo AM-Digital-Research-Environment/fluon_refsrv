@@ -1,3 +1,4 @@
+from typing import List, Tuple
 import click
 import flask.typing
 from flask import current_app, g
@@ -15,7 +16,9 @@ from sqlalchemy.dialects.postgresql import insert
 import pandas as pd
 
 # ~ engine = create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"], echo=True)
-engine = create_engine("postgresql://fo_services:fo_services@db/fo_services", echo=True)
+engine = create_engine(
+    "postgresql+psycopg://fo_services:fo_services@db/fo_services", echo=True
+)
 db_session = scoped_session(
     sessionmaker(autocommit=False, autoflush=False, bind=engine)
 )
@@ -42,16 +45,18 @@ def get_user(username):
     return None
 
 
-def is_new_user(wisski_user_id: str) -> bool:
-    # an anonymous user should be handled as new
-    if len(wisski_user_id) == 0:
+def is_new_user(wisski_user_id: int) -> bool:
+    try:
+        user_id = int(wisski_user_id)
+    except Exception as e:
+        logger.error(f"Could not parse WissKI user-ID to string: {e}")
         return True
 
     is_new = True
 
     try:
         db_session.query(RecommUser.wisski_id).filter(
-            RecommUser.wisski_id == wisski_user_id
+            RecommUser.wisski_id == user_id
         ).one()
         is_new = False
     except:
@@ -59,22 +64,26 @@ def is_new_user(wisski_user_id: str) -> bool:
 
     if not is_new:
         try:
-            logger.debug(f"looking for recommendations for {wisski_user_id}")
+            logger.debug(f"looking for recommendations for {user_id}")
             db_session.query(UserRecommendationModel.user).filter(
-                UserRecommendationModel.user == wisski_user_id
+                UserRecommendationModel.user == user_id
             ).all()
-            logger.debug(f"found recommendations for {wisski_user_id}")
+            logger.debug(f"found recommendations for {user_id}")
         except:
             is_new = True
     else:
-        db_session.add(RecommUser(wisski_user_id))
-        db_session.commit()
-        logger.debug(f"added new user {wisski_user_id}")
+        try:
+            db_session.add(RecommUser(user_id))
+            db_session.commit()
+            logger.debug(f"added new user {user_id}")
+        except Exception as e:
+            logger.error(f"{e}")
+            db_session.rollback()
 
     return is_new
 
 
-def get_itemlist_from_model(user_id, max_n):
+def get_itemlist_from_model(user_id: int, max_n: int) -> List[Tuple[int, int, int]]:
     rows = (
         db_session.query(UserRecommendationModel, ItemClusterInfo)
         .filter(UserRecommendationModel.user == user_id)
@@ -86,7 +95,7 @@ def get_itemlist_from_model(user_id, max_n):
     return [(row[0].item, row[0].rank, row[1].cluster) for row in rows]
 
 
-def get_itemlist_from_cluster(top_n):
+def get_itemlist_from_cluster(top_n: int) -> List[Tuple[int, int, int]]:
 
     rows = (
         db_session.query(
