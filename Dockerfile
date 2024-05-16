@@ -16,7 +16,6 @@ RUN . ./venv/bin/activate \
 COPY src/ ./src
 RUN . ./venv/bin/activate && poetry install --only main
 
-# FROM python:3.11-slim@sha256:161a52751dd68895c01350e44e9761e3965e4cef0f983bc5b6c57fd36d7e513c
 FROM python:3.12-alpine@sha256:ef097620baf1272e38264207003b0982285da3236a20ed829bf6bbf1e85fe3cb
 
 RUN apk add --no-cache \

@@ -15,15 +15,11 @@ flask-restx = "^1.2.0"
 Flask-HTTPAuth = "^4.8.0"
 flask-login = "^0.6.3"
 flask-sqlalchemy = "^3.1.1"
-
 pandas = "^2.2.2"
 uwsgi = "^2.0.25.1"
 joblib = "^1.4.2"
 psycopg = {extras = ["binary", "pool"], version = "^3.1.19"}
 matplotlib = "^3.9.0"
-[tool.pyright]
-venvPath = "/home/ob/000JD/302 DMWG/30-39 Code/302.32__fo_services"
-venv = ".venv"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
@@ -42,3 +38,7 @@ testpaths = ['tests']
 [tool.coverage.run]
 branch = true
 source = ['fo_services']
+
+[tool.pyright]
+venvPath = "/home/ob/000JD/302 DMWG/30-39 Code/302.32__fo_services"
+venv = ".venv"
