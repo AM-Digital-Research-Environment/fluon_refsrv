@@ -1,0 +1,9 @@
+{% extends "_base.html" %}
+
+{% block header %}
+    <h2>Edit user "{{ user.name }}" (ID {{ user.id }})</h2>
+{% endblock %}
+
+{% block content %}
+    {% include "user/_form.html" %}
+{% endblock %}

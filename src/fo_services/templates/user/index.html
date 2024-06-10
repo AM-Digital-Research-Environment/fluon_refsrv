@@ -1,0 +1,36 @@
+{% extends "_base.html" %} {% block content %}
+<h2>Users</h2>
+<div class="my-3">
+  <a href="{{ url_for('user.new') }}" class="btn-primary text-lg"
+    >+ Add a user</a
+  >
+</div>
+<table class="table-auto w-full">
+  <thead class="border-1 border-b">
+    <tr>
+      <th class="text-left">ID</th>
+      <th class="text-left">Name</th>
+      <th class="text-left">LDAP user?</th>
+      <th class="text-left">Created</th>
+      <th class="text-left">Deleted</th>
+      <th class="sr-only">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>{{ user.name }}</td>
+      <td>{{ user.is_ldap_user }}</td>
+      <td>{{ user.created_at }}</td>
+      <td>{{ user.deleted_at }}</td>
+      <td class="text-right">
+        <a href="{{ url_for('user.edit', id=user.id) }}" class="btn-primary"
+          >Edit</a
+        >
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

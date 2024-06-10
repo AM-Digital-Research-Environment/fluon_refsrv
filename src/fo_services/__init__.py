@@ -65,6 +65,9 @@ def create_app(test_config=None):
     from .page_clustervis import bp as clustervis
     from .api_app_v1 import bp as api
     from .api_maintenance_v1 import bp as maintenance
+    from .blueprints import users
+
+    app.register_blueprint(users.bp)
 
     app.register_blueprint(auth)
     app.register_blueprint(clustervis)

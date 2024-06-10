@@ -1,0 +1,9 @@
+{% extends '_base.html' %}
+
+{% block header %}
+<h2>{% block title %}Create new user{% endblock %}</h2>
+{% endblock %}
+
+{% block content %}
+    {% include "user/_form.html" %}
+{% endblock %}

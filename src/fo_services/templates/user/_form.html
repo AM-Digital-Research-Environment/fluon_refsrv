@@ -1,0 +1,49 @@
+<form action="" method="post" class="">
+  <div class="striped">
+    <dl>
+      <div class="mb-2">
+        <dt class="inline-block w-1/4">
+          <label for="user_name"> Name: </label>
+        </dt>
+        <dd class="inline-block w-1/2">
+          <input
+            id="user_name"
+            type="text"
+            name="user_name"
+            value="{% if user %}{{ user.name }}{% endif %}"
+            class="w-full"
+          />
+        </dd>
+      </div>
+      <div class="mb-2">
+        <dt class="inline-block w-1/4">
+          <label for="user_password"> Password: </label>
+        </dt>
+        <dd class="inline-block w-1/2">
+          <input
+            type="password"
+            id="user_password"
+            name="user_password"
+            value="{% if user %}{{ user.password }}{% endif %}"
+            class="w-full"
+          />
+        </dd>
+      </div>
+      <div class="mb-2">
+        <dt class="inline-block w-1/4">
+          <label for="user_password_confirm"> Password confirmation: </label>
+        </dt>
+        <dd class="inline-block w-1/2">
+          <input
+            type="password"
+            id="user_password_confirm"
+            name="user_password_confirm"
+            value="{% if user %}{{ user.password }}{% endif %}"
+            class="w-full"
+          />
+        </dd>
+      </div>
+    </dl>
+  </div>
+  <button type="submit" class="btn-primary mt-8">Save</button>
+</form>

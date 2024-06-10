@@ -7,12 +7,13 @@
   "license": "Proprietary",
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
-    "@tailwindcss/typography": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.13",
     "autoprefixer": "^10.4.16",
     "tailwindcss": "^3.3.5"
   },
   "scripts": {
-    "watch": "tailwindcss --input ./fo_services/assets/main.scss --output ./fo_services/static/main.css --watch",
-    "build": "tailwindcss --input ./fo_services/assets/main.scss --output ./fo_services/static/main.css --minify"
-  }
+    "watch": "tailwindcss --input ./src/fo_services/assets/main.scss --output ./src/fo_services/static/main.css --watch",
+    "build": "tailwindcss --input ./src/fo_services/assets/main.scss --output ./src/fo_services/static/main.css --minify"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

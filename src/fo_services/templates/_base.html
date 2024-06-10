@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="font-mono text-lg font-medium">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <title>{% block title %}{% endblock %}</title>
 </head>
-<body class="bg-slate-800 text-slate-50 font-mono max-w-[1000px] mx-auto">
+<body class="bg-slate-800 text-slate-50 max-w-[1000px] mx-auto">
 <div class="px-4 py-4 mx-auto">
     <nav class="flex flex-row justify-between items-center pb-2 mb-4 border-b border-dashed border-amber-400">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto space-x-6 p-4">
             <a href="{{ url_for('index') }}" class="flex items-center space-x-3 rtl:space-x-reverse">
-                <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Fluid Ontology Services</span>
+                <h1>Fluid Ontology Services</h1>
             </a>
             
             <button data-collapse-toggle="navbar-default" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false">
@@ -26,6 +25,7 @@
                 {% if g.user %}
                     <li><span>Welcome, {{ g.user['name'] }}:</span></li>
                     <li><a href="{{ url_for('clustervis.inspect') }}" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Inspect Clusters</a></li>
+                    <li><a href="{{ url_for('user.index') }}" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Users</a></li>
                     <li><a href="{{ url_for('auth.logout') }}" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Log Out</a></li>
                 {% else %}
                     <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
