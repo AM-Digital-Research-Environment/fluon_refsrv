@@ -167,7 +167,7 @@ def update_model_infos(cluster_data, recommendation_data):
         header = _f.readline()
         if not header.startswith("#"):
             _f.seek(0)
-        with cur.copy(f"COPY {ItemClusterInfo.__tablename__} FROM STDIN DELIMITER ' ' WITH (FORMAT CSV)" ) as copy:
+        with cur.copy(f"COPY {ItemClusterInfo.__tablename__} FROM STDIN WITH (FORMAT CSV)" ) as copy:
             while data := _f.read(100):
                 copy.write(data)
     conn.commit()
@@ -178,7 +178,7 @@ def update_model_infos(cluster_data, recommendation_data):
         header = _f.readline()
         if not header.startswith("#"):
             _f.seek(0)
-        with cur.copy(f"COPY {UserRecommendationModel.__tablename__} FROM STDIN DELIMITER ' ' WITH (FORMAT CSV)" ) as copy:
+        with cur.copy(f"COPY {UserRecommendationModel.__tablename__} FROM STDIN WITH (FORMAT CSV)" ) as copy:
             while data := _f.read(100):
                 copy.write(data)
     conn.commit()
