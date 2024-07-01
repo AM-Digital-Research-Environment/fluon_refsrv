@@ -21,7 +21,7 @@ class KGHandler(object):
     def __init__(self):
         # we want to mimic the self.args-Object here without calling parse_self...
         # https://stackoverflow.com/a/2827734
-        self.data_dir = "/"
+        self.data_dir = "/app/"
         self.data_name = "data"
 
     def fill_sample_users(self):

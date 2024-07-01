@@ -167,13 +167,9 @@ def update_model_infos(cluster_data, recommendation_data):
         header = _f.readline()
         if not header.startswith("#"):
             _f.seek(0)
-        # https://www.psycopg.org/docs/cursor.html#cursor.copy_from
-        cur.copy_from(
-            _f,
-            ItemClusterInfo.__tablename__,  # table name
-            sep=" ",
-            columns=("id", "cluster", "rank"),
-        )
+        with cur.copy(f"COPY {ItemClusterInfo.__tablename__} FROM STDIN DELIMITER ' ' WITH (FORMAT CSV)" ) as copy:
+            while data := _f.read(100):
+                copy.write(data)
     conn.commit()
     n_rows = db_session.query(ItemClusterInfo).count()
     logger.info(f"read {n_rows} items to {ItemClusterInfo.__tablename__}")
@@ -182,12 +178,9 @@ def update_model_infos(cluster_data, recommendation_data):
         header = _f.readline()
         if not header.startswith("#"):
             _f.seek(0)
-        cur.copy_from(
-            _f,
-            UserRecommendationModel.__tablename__,  # table name
-            sep=" ",
-            columns=("user", "item", "rank"),
-        )
+        with cur.copy(f"COPY {UserRecommendationModel.__tablename__} FROM STDIN DELIMITER ' ' WITH (FORMAT CSV)" ) as copy:
+            while data := _f.read(100):
+                copy.write(data)
     conn.commit()
     n_rows = db_session.query(UserRecommendationModel).count()
     logger.info(f"read {n_rows} items to {UserRecommendationModel.__tablename__}")
