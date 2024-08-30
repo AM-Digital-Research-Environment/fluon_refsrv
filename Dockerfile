@@ -27,10 +27,12 @@ WORKDIR /app/
 COPY --from=builder --chown=python:python /app/.venv /app/.venv
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
 
 USER 1001
 
-EXPOSE 5001
+EXPOSE 5000
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENTRYPOINT ["uwsgi"]
