@@ -2,19 +2,16 @@ import json
 from datetime import datetime
 import logging
 
-from flask import Flask, Blueprint, request, session, g
+from flask import Blueprint, request
 from flask_httpauth import HTTPBasicAuth
 from .page_auth import check_login
 from . import KG
 
 from flask_restx import Api, Resource, fields, reqparse
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .db import log_user_detail_interaction
 
 bp = Blueprint("api", __name__, url_prefix="/api/v1")
-
-import logging
 
 flog = logging.getLogger(__name__)
 
@@ -320,13 +317,13 @@ class DetailResults(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(
             "id",
-            type=str,
+            type=int,
             default="",
             help="The ID of a WissKI entity, format: <bundleid>:<entityid>",
         )
         parser.add_argument(
             "user",
-            type=str,
+            type=int,
             default="",
             help=(
                 "The user-ID of the Drupal-user conducting the search. May be"
@@ -395,22 +392,17 @@ class Recommendation(Resource):
     @recommendations.response(
         401, "Unauthorized", headers={"www-authenticate": "auth prompt"}
     )
-    def get(self, user_id: int | None = None):
-        # TODO: handle the "empty" case better than with a sentinel value
-        user = user_id
-        if user_id is None:
-            user = -1
-
+    def get(self, user_id: int = -1):
         n = request.args.get("n", 10, type=int)
         offset = request.args.get("offset", 0, type=int)
 
-        items = KG.recommend_me_something(user, n, offset)
+        items = KG.recommend_me_something(user_id, n, offset)
 
         flog.info(
             _(
                 module="recommendation",
                 http_user=auth.current_user(),
-                user=user,
+                user=user_id,
                 recommendation=items,
             )
         )

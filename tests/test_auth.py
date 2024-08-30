@@ -3,14 +3,14 @@ import pytest_mock
 from flask import Flask, session
 from flask.testing import FlaskClient
 
-from fo_services import LDAPAuthClient
+
 from fo_services.db import get_user
 
 
 def test_register(client: FlaskClient, app: Flask):
     assert client.get("/auth/user/create").status_code == 200
 
-    response = client.post("/auth/user/create", data={"username": "a", "password": "a"})
+    client.post("/auth/user/create", data={"username": "a", "password": "a"})
 
     with app.app_context():
         assert get_user("a") is not None

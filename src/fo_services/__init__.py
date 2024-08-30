@@ -2,18 +2,15 @@ import logging
 import os
 import tomllib
 
-logger = logging.getLogger(__name__)
+from flask import Flask, flash, render_template
 
-from flask import Flask, render_template, flash
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from fo_services.LDAPAuthClient import LDAPAuthClient, LDAPExtension
-from flask_login import LoginManager
-
-
 from .kgstuff import KGHandler
+from fo_services.LDAPAuthClient import LDAPExtension
+
+
+logger = logging.getLogger(__name__)
 
 LDAP = LDAPExtension()
 KG = KGHandler()
@@ -31,6 +28,8 @@ def create_app(test_config=None):
         RESTX_MASK_HEADER=None,
     )
 
+    app.config.from_prefixed_env()
+
     if test_config is None:
         app.config.from_pyfile("config.py", silent=True)
     else:
@@ -38,7 +37,7 @@ def create_app(test_config=None):
 
     try:
         os.makedirs(app.instance_path)
-    except:
+    except Exception:
         pass
 
     @app.route("/", methods=["GET"])
@@ -61,11 +60,11 @@ def create_app(test_config=None):
     LDAP.init_app(app, ldap_config)
     KG.load_shit()
 
-    from .page_auth import bp as auth
-    from .page_clustervis import bp as clustervis
     from .api_app_v1 import bp as api
     from .api_maintenance_v1 import bp as maintenance
     from .blueprints import users
+    from .page_auth import bp as auth
+    from .page_clustervis import bp as clustervis
 
     app.register_blueprint(users.bp)
 

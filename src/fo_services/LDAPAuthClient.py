@@ -49,7 +49,7 @@ class LDAPAuthClient:
         self.ldap_bind_password = config.bind_password
         self.ldap_filter = config.filter
         self.ldap_base = config.base
-        self.connection = None
+        self.connection: ldap3.Connection | None = None
 
     def get_server(self):
         return ldap3.ServerPool(
@@ -113,7 +113,7 @@ class LDAPAuthClient:
         server: ldap3.ServerPool | ldap3.Server,
         password: str,
         filters: List[Tuple[str, str]],
-    ) -> Tuple[bool, ldap3.Connection, Any]:
+    ) -> Tuple[bool, ldap3.Connection | None, Any]:
         try:
             if self.ldap_bind_dn is None or self.ldap_bind_password is None:
                 raise ValueError("Missing bind DN or bind password")

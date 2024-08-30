@@ -1,36 +1,32 @@
-[tool.poetry]
+[project]
 name = "fo_services"
 version = "0.1.0"
 description = ""
-authors = ["Oliver Baumann <oliver.baumann@uni-bayreuth.de>"]
-license = "Proprietary"
+authors = [
+    { name = "Oliver Baumann", email = "oliver.baumann@uni-bayreuth.de" }
+]
+license = {text = "Proprietary"}
 readme = "README.md"
 package-mode = false
-
-[tool.poetry.dependencies]
-python = "^3.11"
-Flask = "<3.0.0"
-ldap3 = "^2.9.1"
-flask-restx = "^1.2.0"
-Flask-HTTPAuth = "^4.8.0"
-flask-login = "^0.6.3"
-flask-sqlalchemy = "^3.1.1"
-pandas = "^2.2.2"
-uwsgi = "^2.0.25.1"
-joblib = "^1.4.2"
-psycopg = {extras = ["binary", "pool"], version = "^3.1.19"}
-matplotlib = "^3.9.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.3"
-coverage = "^7.3.2"
-pytest-mock = "^3.12.0"
-black = "^24.4.2"
-isort = "^5.13.2"
+requires-python = ">=3.11"
+dependencies = [
+    "flask",
+    "ldap3",
+    "flask-restx",
+    "flask-httpauth",
+    "flask-login",
+    "flask-sqlalchemy",
+    "pandas",
+    "uwsgi",
+    "joblib",
+    "matplotlib",
+    "requests>=2.32.3",
+    "psycopg[binary,pool]>=3.2.1",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = ['tests']
@@ -39,6 +35,25 @@ testpaths = ['tests']
 branch = true
 source = ['fo_services']
 
-[tool.pyright]
-venvPath = "/home/ob/000JD/302 DMWG/30-39 Code/302.32__fo_services"
-venv = ".venv"
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3.2",
+    "coverage>=7.6.1",
+    "pytest-mock>=3.14.0",
+    "black>=24.8.0",
+    "isort>=5.13.2",
+    "pyflakes>=3.2.0",
+    "ruff>=0.6.2",
+    "pandas-stubs>=2.2.2.240807",
+    "types-colorama>=0.4.15.20240311",
+    "types-ldap3>=2.9.13.20240205",
+    "types-requests>=2.32.0.20240712",
+    "mypy>=1.11.2",
+]
+
+[tool.mypy]
+disable_error_code = "import-untyped"
+
+[tool.ruff]
+indent-width = 4
+fix = true

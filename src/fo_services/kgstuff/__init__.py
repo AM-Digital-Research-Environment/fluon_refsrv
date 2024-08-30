@@ -1,10 +1,9 @@
 import logging
+from collections.abc import Sequence
 from typing import List
 
-logger = logging.getLogger(__name__)
-
-
 from ..db import (
+    UpdateModelResult,
     export_interaction_data,
     export_user_data,
     get_itemlist_from_cluster,
@@ -14,8 +13,10 @@ from ..db import (
 )
 
 
-class KGHandler(object):
+logger = logging.getLogger(__name__)
 
+
+class KGHandler(object):
     NUM_DEFAULT_RECOMMENDATIONS = 10
 
     def __init__(self):
@@ -27,6 +28,7 @@ class KGHandler(object):
     def fill_sample_users(self):
         # for testing purposes: fill db with random user info
         import os
+
         from ..db import Base, db_session, engine
         from ..models import (
             InteractionHistory,
@@ -40,7 +42,7 @@ class KGHandler(object):
             InteractionHistory.__table__.drop(engine)
             RecommUser.__table__.drop(engine)
             ItemClusterInfo.__table__.drop(engine)
-        except:
+        except Exception:
             pass
         Base.metadata.create_all(bind=engine)
 
@@ -60,8 +62,8 @@ class KGHandler(object):
             f"remember: I am creating {N} dummy users right now in KGHandler.fill_sample_data!"
         )
 
-        for u in range(N):
-            db_session.add(RecommUser(u))
+        for user_id in range(N):
+            db_session.add(RecommUser(wisski_id=user_id))
         db_session.commit()
         return N
 
@@ -80,11 +82,11 @@ class KGHandler(object):
             for line in f:
                 items.append(int(line.strip().split(" ")[2]))
 
-        for u in range(n_users):
+        for user in range(n_users):
             n = random.choice(range(n_interact_min, n_interact_max + 1))
             interactions = random.sample(items, k=n)
-            for i in interactions:
-                db_session.add(InteractionHistory(u, i))
+            for item in interactions:
+                db_session.add(InteractionHistory(wisski_user=user, wisski_item=item))
 
         db_session.commit()
 
@@ -97,16 +99,10 @@ class KGHandler(object):
         # ~ self.fill_sample_interactions(self.N,n_interact_min,n_interact_max)
         pass
 
-    def reload_data(self):
-        clu_file = f"{self.data_dir}/{self.data_name}/cluster.csv"
-        rec_file = f"{self.data_dir}/{self.data_name}/recommendations.csv"
-        res = update_model_infos(clu_file, rec_file)
-
-        # ~ n_interact_min = 10
-        # ~ n_interact_max = 50
-        # ~ self.fill_sample_interactions(self.N,n_interact_min,n_interact_max)
-
-        return res
+    def reload_data(
+        self, cluster_data: Sequence, reco_data: Sequence
+    ) -> UpdateModelResult:
+        return update_model_infos(cluster_data, reco_data)
 
     def export_user_data(self):
         usr_file = "/app/known_users.tsv"
@@ -120,7 +116,7 @@ class KGHandler(object):
 
     def recommend_me_something(
         self, user_id: int, max_n: int, offset: int
-    ) -> List[str]:
+    ) -> List[int]:
         if offset > 0:
             max_n += offset
 
