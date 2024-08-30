@@ -2,12 +2,10 @@ services:
   app:
     build: .
     ports:
-      - 5001:5000
+      - 5000:5000
     volumes:
       - ./src:/app/src/
       - ./data:/app/data/
-    command: ["run", "--", "flask", "--app", "fo_services", "run", "--host", "0.0.0.0", "--debug"]
-    entrypoint: ["uv"]
     environment:
         MPLCONFIGDIR: "/app/mplconfig"
         FLASK_TRAINING_API_URL: "http://fo_training-server:5000"
