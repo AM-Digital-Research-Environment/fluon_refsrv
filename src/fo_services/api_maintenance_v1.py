@@ -1,18 +1,19 @@
 import json
-from datetime import datetime
+import logging
 import os
+from datetime import datetime
 
-from flask import Flask, Blueprint, session, g, send_from_directory
+from flask import Blueprint, current_app, send_from_directory
 from flask_httpauth import HTTPBasicAuth
-from .page_auth import check_login
-from . import KG
+from flask_restx import Api, Resource, fields
 
-from flask_restx import Api, Resource, fields, reqparse
-from werkzeug.middleware.proxy_fix import ProxyFix
+from fo_services.client.api_clients import TrainingApiClient
+
+from . import KG
+from .page_auth import check_login
 
 bp = Blueprint("maintenance", __name__, url_prefix="/maintenance/v1")
 
-import logging
 
 flog = logging.getLogger(__name__)
 
@@ -57,19 +58,34 @@ db = api.namespace(
 )
 
 
-class DbResponse(object):
-    def __init__(self, result) -> None:
-        self.result = result
-
-
 resultObject = api.model(
     "update",
     {
-        "result": fields.Boolean(
+        "cluster_assignments_to_write": fields.Integer(
             required=True,
-            description="indication of DB update process",
-            example=False,
-        )
+            description="Number of cluster assignments to persist",
+            example=42,
+        ),
+        "cluster_assignments_written": fields.Integer(
+            required=True,
+            description="Number of cluster assignments that were persisted",
+            example=42,
+        ),
+        "reco_assignments_to_write": fields.Integer(
+            required=True,
+            description="Number of reco assignments to persist",
+            example=42,
+        ),
+        "reco_assignments_written": fields.Integer(
+            required=True,
+            description="Number of reco assignments that were persisted",
+            example=42,
+        ),
+        "elapsed": fields.Float(
+            required=True,
+            description="Elapsed time during database update, in seconds",
+            example=4.2,
+        ),
     },
 )
 update_doc = "Trigger reloading catalog information from KG model."
@@ -77,12 +93,17 @@ update_doc = "Trigger reloading catalog information from KG model."
 
 @db.route("/update", doc={"description": update_doc})
 class Updater(Resource):
+    def __init__(self, api=None, *args, **kwargs):
+        super().__init__(api, args, kwargs)
+        self.client = TrainingApiClient(current_app.config["TRAINING_API_URL"])
+
     @auth.login_required
     @db.marshal_with(resultObject)
     @db.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
     def post(self):
-        result = KG.reload_data()
-        return DbResponse(result=result)
+        cluster_data = self.client.get_cluster()
+        reco_data = self.client.get_recommendations()
+        return KG.reload_data(cluster_data, reco_data)
 
 
 export_user_doc = "Trigger exporting user information from DB."

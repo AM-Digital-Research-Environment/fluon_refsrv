@@ -35,10 +35,10 @@ def check_login(username, password):
             known_user = get_user(username)
             if known_user is None:
                 try:
-                    known_user = User(username, is_ldap_user=True)
+                    known_user = User(name=username, is_ldap_user=True)
                     db_session.add(known_user)
                     db_session.commit()
-                except:
+                except Exception:
                     logging.info(
                         f"cant add {username} to the db during login as it is already registered"
                     )
@@ -64,10 +64,10 @@ def create_user():
 
         if error is None:
             try:
-                u = User(username, generate_password_hash(password), is_ldap_user=False)
+                u = User(name=username, password=generate_password_hash(password), is_ldap_user=False)
                 db_session.add(u)
                 db_session.commit()
-            except:
+            except Exception:
                 error = f"User {username} is already registered"
             else:
                 return redirect(url_for("auth.login"))

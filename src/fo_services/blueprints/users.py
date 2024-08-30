@@ -38,10 +38,10 @@ def new():
 
         if error is None:
             try:
-                u = User(username, generate_password_hash(password), is_ldap_user=False)
+                u = User(name=username, password=generate_password_hash(password), is_ldap_user=False)
                 db_session.add(u)
                 db_session.commit()
-            except:
+            except Exception:
                 error = f"User {username} is already registered"
             else:
                 flash(f"Successfully created user {username}!", "success")

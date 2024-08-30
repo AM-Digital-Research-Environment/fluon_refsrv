@@ -2,18 +2,19 @@ services:
   app:
     build: .
     ports:
-      - 5000:5000
+      - 5001:5000
     volumes:
       - ./src:/app/src/
       - ./data:/app/data/
-    command: ["--app", "fo_services", "run", "--host", "0.0.0.0", "--debug"]
-    entrypoint: ["/app/venv/bin/flask"]
+    command: ["run", "--", "flask", "--app", "fo_services", "run", "--host", "0.0.0.0", "--debug"]
+    entrypoint: ["uv"]
     environment:
         MPLCONFIGDIR: "/app/mplconfig"
-    networks:
-      - backbone
+        FLASK_TRAINING_API_URL: "http://fo_training-server:5000"
     depends_on:
       - db
+    networks:
+        - backbone
   db:
     image: postgres:latest
     restart: always
@@ -26,26 +27,27 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     networks:
-      - backbone
-  #~ pgadmin:
-    #~ image: dpage/pgadmin4
-    #~ container_name: fo_pgadmin
-    #~ restart: always
-    #~ environment:
-      #~ PGADMIN_DEFAULT_EMAIL: "bla@fasel.com"
-      #~ PGADMIN_DEFAULT_PASSWORD: 123
-    #~ depends_on:
-      #~ - db
-    #~ networks:
-      #~ - backbone
-    #~ ports:
-      #~ - "8888:80"
-    #~ volumes:
-      #~ - pgadmin-data:/var/lib/pgadmin
+        - backbone
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    container_name: fo_pgadmin
+#    restart: always
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: "bla@fasel.com"
+#      PGADMIN_DEFAULT_PASSWORD: 123
+#    depends_on:
+#      - db
+#    ports:
+#      - "8888:80"
+#    volumes:
+#      - pgadmin-data:/var/lib/pgadmin
+#    networks:
+#        - backbone
 
 volumes:
   instance: {}
   db: {}
   pgadmin-data: {}
+
 networks:
-  backbone: {}
+    backbone: {}

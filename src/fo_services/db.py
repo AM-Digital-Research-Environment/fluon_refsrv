@@ -1,19 +1,15 @@
-from typing import List, Tuple
-import click
-import flask.typing
-from flask import current_app, g
-
 import logging
-
-logger = logging.getLogger(__name__)
-
-from sqlalchemy import create_engine, func, select, and_
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.exc import NoResultFound
-from sqlalchemy.dialects.postgresql import insert
+import time
+from collections.abc import Sequence
+from typing import List, Tuple, TypedDict
 
 import pandas as pd
+from psycopg.errors import ForeignKeyViolation
+from sqlalchemy import and_, create_engine, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import DeclarativeBase, scoped_session, sessionmaker
+
+logger = logging.getLogger(__name__)
 
 # ~ engine = create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"], echo=True)
 engine = create_engine(
@@ -22,10 +18,21 @@ engine = create_engine(
 db_session = scoped_session(
     sessionmaker(autocommit=False, autoflush=False, bind=engine)
 )
-Base = declarative_base()
+
+
+class Base(DeclarativeBase):
+    pass
+
+
 Base.query = db_session.query_property()
 
-from .models import *
+from .models import (
+    InteractionHistory,
+    ItemClusterInfo,
+    RecommUser,
+    User,
+    UserRecommendationModel,
+)
 
 
 def init_db():
@@ -40,44 +47,39 @@ def get_user(username):
     try:
         u = db_session.query(User).filter(User.name == username).one()
         return u
-    except:
-        pass
+    except Exception:
+        logger.exception("Error fetching user")
+
     return None
 
 
 def is_new_user(wisski_user_id: int) -> bool:
-    try:
-        user_id = int(wisski_user_id)
-    except Exception as e:
-        logger.error(f"Could not parse WissKI user-ID to string: {e}")
-        return True
-
     is_new = True
 
     try:
         db_session.query(RecommUser.wisski_id).filter(
-            RecommUser.wisski_id == user_id
+            RecommUser.wisski_id == wisski_user_id
         ).one()
         is_new = False
-    except:
+    except Exception:
         pass
 
     if not is_new:
         try:
-            logger.debug(f"looking for recommendations for {user_id}")
+            logger.debug(f"looking for recommendations for {wisski_user_id}")
             db_session.query(UserRecommendationModel.user).filter(
-                UserRecommendationModel.user == user_id
+                UserRecommendationModel.user == wisski_user_id
             ).all()
-            logger.debug(f"found recommendations for {user_id}")
-        except:
+            logger.debug(f"found recommendations for {wisski_user_id}")
+        except Exception:
             is_new = True
     else:
         try:
-            db_session.add(RecommUser(user_id))
+            db_session.add(RecommUser(wisski_id=wisski_user_id))
             db_session.commit()
-            logger.debug(f"added new user {user_id}")
-        except Exception as e:
-            logger.error(f"{e}")
+            logger.debug(f"added new user {wisski_user_id}")
+        except Exception:
+            logger.exception("Error creating new user")
             db_session.rollback()
 
     return is_new
@@ -96,7 +98,6 @@ def get_itemlist_from_model(user_id: int, max_n: int) -> List[Tuple[int, int, in
 
 
 def get_itemlist_from_cluster(top_n: int) -> List[Tuple[int, int, int]]:
-
     rows = (
         db_session.query(
             ItemClusterInfo.id, ItemClusterInfo.rank, ItemClusterInfo.cluster
@@ -109,14 +110,23 @@ def get_itemlist_from_cluster(top_n: int) -> List[Tuple[int, int, int]]:
     return [(row.id, row.rank, row.cluster) for row in rows]
 
 
-def log_user_detail_interaction(wisski_user, wisski_item):
+def log_user_detail_interaction(wisski_user: int, wisski_item: int):
     try:
-        db_session.add(InteractionHistory(int(wisski_user), int(wisski_item)))
+        db_session.add(RecommUser(wisski_id=wisski_user))
+        db_session.commit()
+    except Exception:
+        db_session.rollback()
+
+    try:
+        db_session.add(
+            InteractionHistory(wisski_user=wisski_user, wisski_item=wisski_item)
+        )
         db_session.commit()
         return True
-    except Exception as e:
-        logger.debug("error in logging interaction history: " + repr(e))
-        pass
+    except Exception:
+        logger.exception("error in logging interaction history: ")
+        db_session.rollback()
+
     return False
 
 
@@ -139,53 +149,67 @@ def export_interaction_data(interaction_history_file):
     data.to_csv(interaction_history_file, index=False, sep="\t")
 
 
-def update_model_infos(cluster_data, recommendation_data):
+class UpdateModelResult(TypedDict):
+    cluster_assignments_to_write: int
+    cluster_assignments_written: int
+    reco_assignments_written: int
+    reco_assignments_to_write: int
+    elapsed: float
+
+
+def update_model_infos(
+    cluster_data: Sequence, recommendation_data: Sequence
+) -> UpdateModelResult:
     logger.debug("updating model infos")
+    start = time.time()
 
     try:
-        UserRecommendationModel.query.delete()
+        db_session.query(ItemClusterInfo).delete()
+        db_session.query(UserRecommendationModel).delete()
         db_session.commit()
-    except:
-        pass
-    try:
-        ItemClusterInfo.query.delete()
-        db_session.commit()
-    except:
-        pass
+    except Exception:
+        db_session.rollback()
+        logger.exception("Error truncating tables prior to update")
+        return UpdateModelResult(
+            cluster_assignments_to_write=len(cluster_data),
+            cluster_assignments_written=0,
+            reco_assignments_to_write=len(recommendation_data),
+            reco_assignments_written=0,
+            elapsed=time.time() - start,
+        )
 
-    # ~ try:
-        # ~ UserRecommendationModel.__table__.drop(engine)
-        # ~ ItemClusterInfo.__table__.drop(engine)
-    # ~ except:
-        # ~ pass
-    # ~ Base.metadata.create_all(bind=engine)
+    # try is outside the loop as insertion shouldn't fail for single items
+    with db_session.begin():
+        for item in cluster_data:
+            db_session.add(
+                ItemClusterInfo(
+                    id=item["id"], cluster=item["cluster"], rank=item["rank"]
+                )
+            )
 
-    conn = engine.raw_connection()
+    # try inside loop, as inserting a single row can violate foreign key constraints, in which case we want to simply continue
+    for item in recommendation_data:
+        db_session.add(
+            UserRecommendationModel(
+                user=item["user"], item=item["item"], rank=item["rank"]
+            )
+        )
+        try:
+            db_session.commit()
+        except (IntegrityError, ForeignKeyViolation):
+            db_session.rollback()
+            logger.exception("Integrity error inserting user-reco. Rolling back.")
 
-    # ~ try:
-    with conn.cursor() as cur, open(cluster_data, "r") as _f:
-        header = _f.readline()
-        if not header.startswith("#"):
-            _f.seek(0)
-        with cur.copy(f"COPY {ItemClusterInfo.__tablename__} FROM STDIN WITH (FORMAT CSV)" ) as copy:
-            while data := _f.read(100):
-                copy.write(data)
-    conn.commit()
-    n_rows = db_session.query(ItemClusterInfo).count()
-    logger.info(f"read {n_rows} items to {ItemClusterInfo.__tablename__}")
+    n_rows_cluster = db_session.query(ItemClusterInfo).count()
+    logger.info(f"read {n_rows_cluster} items to {ItemClusterInfo.__tablename__}")
 
-    with conn.cursor() as cur, open(recommendation_data, "r") as _f:
-        header = _f.readline()
-        if not header.startswith("#"):
-            _f.seek(0)
-        with cur.copy(f"COPY {UserRecommendationModel.__tablename__} FROM STDIN WITH (FORMAT CSV)" ) as copy:
-            while data := _f.read(100):
-                copy.write(data)
-    conn.commit()
-    n_rows = db_session.query(UserRecommendationModel).count()
-    logger.info(f"read {n_rows} items to {UserRecommendationModel.__tablename__}")
-    # ~ except:
-        # ~ db_session.rollback()
-        # ~ return False
-    
-    return True
+    n_rows_recos = db_session.query(UserRecommendationModel).count()
+    logger.info(f"read {n_rows_recos} items to {UserRecommendationModel.__tablename__}")
+
+    return UpdateModelResult(
+        cluster_assignments_to_write=len(cluster_data),
+        cluster_assignments_written=n_rows_cluster,
+        reco_assignments_to_write=len(recommendation_data),
+        reco_assignments_written=n_rows_recos,
+        elapsed=time.time() - start,
+    )
