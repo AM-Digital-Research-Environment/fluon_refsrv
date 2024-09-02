@@ -62,9 +62,9 @@ class ItemClusterInfo(Base):
 
 class UserRecommendationModel(Base):
     __tablename__ = "user_recommendation_model"
-    user: Mapped[int]
-    item: Mapped[int]
-    rank: Mapped[int]
+    user: Mapped[int] = mapped_column(primary_key=True)
+    item: Mapped[int] = mapped_column(primary_key=True)
+    rank: Mapped[int] = mapped_column(primary_key=True)
 
     def __repr__(self) -> str:
         return f"UserRecommendationModel(user={self.user!r}, item={self.item!r}, rank={self.rank!r})"
