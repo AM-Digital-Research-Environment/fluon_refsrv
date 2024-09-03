@@ -29,7 +29,11 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
-testpaths = ['tests']
+# testpaths = ['tests']
+addopts = [
+    "--import-mode=importlib",
+    "--testdox"
+]
 
 [tool.coverage.run]
 branch = true
@@ -49,6 +53,7 @@ dev-dependencies = [
     "types-ldap3>=2.9.13.20240205",
     "types-requests>=2.32.0.20240712",
     "mypy>=1.11.2",
+    "pytest-testdox>=3.1.0",
 ]
 
 [tool.mypy]

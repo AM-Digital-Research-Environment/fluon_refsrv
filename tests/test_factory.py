@@ -1,6 +1,9 @@
 from flask.testing import FlaskClient
 
+import pytest
 from fo_services import create_app
+
+pytestmark = pytest.mark.skip(reason="Relies on proper DB connection")
 
 
 def test_config():

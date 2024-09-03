@@ -6,9 +6,10 @@ services:
     volumes:
       - ./src:/app/src/
       - ./data:/app/data/
+    restart: always
     environment:
         MPLCONFIGDIR: "/app/mplconfig"
-        FLASK_TRAINING_API_URL: "http://fo_training-server:5000"
+        FLASK_TRAINING_API_URL: "http://132.180.40.96:5000"
     depends_on:
       - db
     networks:

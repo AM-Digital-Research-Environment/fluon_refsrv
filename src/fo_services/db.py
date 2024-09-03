@@ -164,8 +164,9 @@ def update_model_infos(
     start = time.time()
 
     try:
-        db_session.query(ItemClusterInfo).delete()
+        # must come first due to foreign key relations to ItemClusterInfo
         db_session.query(UserRecommendationModel).delete()
+        db_session.query(ItemClusterInfo).delete()
         db_session.commit()
     except Exception:
         db_session.rollback()

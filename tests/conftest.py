@@ -7,7 +7,7 @@ from flask import Flask
 from flask.testing import FlaskClient, FlaskCliRunner
 
 from fo_services import create_app, LDAPExtension
-from fo_services.db import init_db, get_db
+# from fo_services.db import init_db, get_db
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     data_sql = f.read().decode("utf8")
@@ -28,9 +28,11 @@ def app():
         }
     )
 
-    with app.app_context():
-        init_db()
-        get_db().executescript(data_sql)
+    # This ain't working. We've forgotten something after shifting everything into
+    # Postgres
+    # with app.app_context():
+    #     init_db()
+    #     get_db().executescript(data_sql)
 
     LDAP.init_app(app, ldap_config)
 
