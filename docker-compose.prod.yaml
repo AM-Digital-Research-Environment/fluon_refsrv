@@ -1,6 +1,8 @@
 services:
   app:
     build: .
+    image: fo_services:latest
+    pull_policy: never
     ports:
       - 5000:5000
     volumes:
@@ -9,7 +11,7 @@ services:
     restart: always
     environment:
         MPLCONFIGDIR: "/app/mplconfig"
-        FLASK_TRAINING_API_URL: "http://132.180.40.96:5000"
+        FLASK_TRAINING_API_URL: "http://fo_training:5000"
     depends_on:
       - db
     networks:
@@ -17,8 +19,6 @@ services:
   db:
     image: postgres:latest
     restart: always
-    # ports:
-    #   - "5432:5432"
     environment:
       POSTGRES_USER: fo_services
       POSTGRES_PASSWORD: fo_services
@@ -27,21 +27,32 @@ services:
       - db:/var/lib/postgresql/data
     networks:
         - backbone
-#  pgadmin:
-#    image: dpage/pgadmin4
-#    container_name: fo_pgadmin
-#    restart: always
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: "bla@fasel.com"
-#      PGADMIN_DEFAULT_PASSWORD: 123
-#    depends_on:
-#      - db
-#    ports:
-#      - "8888:80"
-#    volumes:
-#      - pgadmin-data:/var/lib/pgadmin
-#    networks:
-#        - backbone
+  cron:
+    image: fo_services:latest
+    pull_policy: never
+    restart: always
+    entrypoint: ./cron.sh
+    environment:
+        FLASK_TRAINING_API_URL: "http://fo_training:5000"
+    depends_on:
+        - db
+    networks:
+        - backbone
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: fo_pgadmin
+  #   restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: "bla@fasel.com"
+  #     PGADMIN_DEFAULT_PASSWORD: 123
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - "8888:80"
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin
+  #   networks:
+  #       - backbone
 
 volumes:
   instance: {}

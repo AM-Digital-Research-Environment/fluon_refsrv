@@ -1,16 +1,19 @@
 services:
   app:
     build: .
+    image: fo_services:latest
+    pull_policy: never
+    restart: always
+    entrypoint: ["uv"]
+    command: ["run", "--", "flask", "--app", "fo_services", "run", "--host", "0.0.0.0", "--debug"]
     ports:
-      - 5001:5000
+      - 5000:5000
+    environment:
+        MPLCONFIGDIR: "/app/mplconfig"
+        FLASK_TRAINING_API_URL: "http://fo_training:5000"
     volumes:
       - ./src:/app/src/
       - ./data:/app/data/
-    command: ["run", "--", "flask", "--app", "fo_services", "run", "--host", "0.0.0.0", "--debug"]
-    entrypoint: ["uv"]
-    environment:
-        MPLCONFIGDIR: "/app/mplconfig"
-        FLASK_TRAINING_API_URL: "http://fo_training-server:5000"
     depends_on:
       - db
     networks:
@@ -18,14 +21,23 @@ services:
   db:
     image: postgres:latest
     restart: always
-    # ports:
-    #   - "5432:5432"
     environment:
       POSTGRES_USER: fo_services
       POSTGRES_PASSWORD: fo_services
       POSTGRES_DB: fo_services
     volumes:
       - db:/var/lib/postgresql/data
+    networks:
+        - backbone
+  cron:
+    image: fo_services:latest
+    pull_policy: never
+    restart: always
+    entrypoint: ./cron.sh
+    environment:
+        FLASK_TRAINING_API_URL: "http://fo_training:5000"
+    depends_on:
+        - db
     networks:
         - backbone
 #  pgadmin:

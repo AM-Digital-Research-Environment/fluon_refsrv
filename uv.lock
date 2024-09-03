@@ -289,6 +289,7 @@ name = "fo-services"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "click" },
     { name = "flask" },
     { name = "flask-httpauth" },
     { name = "flask-login" },
@@ -301,6 +302,7 @@ dependencies = [
     { name = "psycopg", extra = ["binary", "pool"] },
     { name = "requests" },
     { name = "uwsgi" },
+    { name = "wasabi" },
 ]
 
 [package.dev-dependencies]
@@ -322,6 +324,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "click", specifier = ">=8.1.7" },
     { name = "flask" },
     { name = "flask-httpauth" },
     { name = "flask-login" },
@@ -334,6 +337,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.1" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "uwsgi" },
+    { name = "wasabi", specifier = ">=1.1.3" },
 ]
 
 [package.metadata.requires-dev]
@@ -1182,6 +1186,18 @@ name = "uwsgi"
 version = "2.0.26"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/3a/7a/4c910bdc9d32640ba89f8d1dc256872c2b5e64830759f7dc346815f5b3b1/uwsgi-2.0.26.tar.gz", hash = "sha256:86e6bfcd4dc20529665f5b7777193cdc48622fb2c59f0a7f1e3dc32b3882e7f9", size = 814143 }
+
+[[package]]
+name = "wasabi"
+version = "1.1.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ac/f9/054e6e2f1071e963b5e746b48d1e3727470b2a490834d18ad92364929db3/wasabi-1.1.3.tar.gz", hash = "sha256:4bb3008f003809db0c3e28b4daf20906ea871a2bb43f9914197d540f4f2e0878", size = 30391 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/06/7c/34330a89da55610daa5f245ddce5aab81244321101614751e7537f125133/wasabi-1.1.3-py3-none-any.whl", hash = "sha256:f76e16e8f7e79f8c4c8be49b4024ac725713ab10cd7f19350ad18a8e3f71728c", size = 27880 },
+]
 
 [[package]]
 name = "werkzeug"

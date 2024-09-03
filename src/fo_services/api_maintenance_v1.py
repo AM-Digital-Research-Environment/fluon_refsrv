@@ -11,6 +11,7 @@ from fo_services.client.api_clients import TrainingApiClient
 
 from . import KG
 from .page_auth import check_login
+from .services.updater import UpdaterService
 
 bp = Blueprint("maintenance", __name__, url_prefix="/maintenance/v1")
 
@@ -95,15 +96,15 @@ update_doc = "Trigger reloading catalog information from KG model."
 class Updater(Resource):
     def __init__(self, api=None, *args, **kwargs):
         super().__init__(api, args, kwargs)
-        self.client = TrainingApiClient(current_app.config["TRAINING_API_URL"])
+        self.updater_service = UpdaterService(
+            TrainingApiClient(current_app.config["TRAINING_API_URL"])
+        )
 
     @auth.login_required
     @db.marshal_with(resultObject)
     @db.response(401, "Unauthorized", headers={"www-authenticate": "auth prompt"})
     def post(self):
-        cluster_data = self.client.get_cluster()
-        reco_data = self.client.get_recommendations()
-        return KG.reload_data(cluster_data, reco_data)
+        return self.updater_service.reload_data()
 
 
 export_user_doc = "Trigger exporting user information from DB."

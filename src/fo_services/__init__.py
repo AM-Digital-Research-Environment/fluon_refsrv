@@ -73,4 +73,7 @@ def create_app(test_config=None):
     app.register_blueprint(api)
     app.register_blueprint(maintenance)
 
+    from .cli.update_model import update_model
+    app.cli.add_command(update_model)
+
     return app
