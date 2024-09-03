@@ -19,7 +19,8 @@ RUN apk add --no-cache \
 RUN <<EOF
 mkdir /app /app/instance /app/mplconfig
 mkdir -p /var/spool/cron/crontabs
-echo '* * * * * /app/.venv/bin/flask update-model' > /var/spool/cron/crontabs/root
+# run job at "minute 31 past every 7th hour." [0,7,14,21]:31
+echo '31 */7 * * * /app/.venv/bin/flask update-model' > /var/spool/cron/crontabs/root
 EOF
 
 COPY . /app/
