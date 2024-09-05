@@ -1,11 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 data
 
-=======
->>>>>>> 18ee153ae12b633c66915754ab6164940d58acd7
-=======
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -91,92 +85,6 @@ profile_default/
 ipython_config.py
 
 # pyenv
-<<<<<<< HEAD
-<<<<<<< HEAD
-#   For a library or package, you might want to ignore these files since the
-#   code is
-=======
-#   For a library or package, you might want to ignore these files since the code is
->>>>>>> 18ee153ae12b633c66915754ab6164940d58acd7
-=======
-#   For a library or package, you might want to ignore these files since the code is
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
-
-# pipenv
-<<<<<<< HEAD
-<<<<<<< HEAD
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in
-#   version control.
-#   However, in case of collaboration, if having platform-specific dependencies
-#   or dependencies
-#   having no cross-platform support, pipenv may install dependencies that
-#   don't work, or not
-=======
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
->>>>>>> 18ee153ae12b633c66915754ab6164940d58acd7
-=======
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea
-#   install all needed dependencies.
-#Pipfile.lock
-
-# poetry
-<<<<<<< HEAD
-<<<<<<< HEAD
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock
-#   in version control.
-#   This is especially recommended for binary packages to ensure
-#   reproducibility, and is more
-=======
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
->>>>>>> 18ee153ae12b633c66915754ab6164940d58acd7
-=======
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-
-# pdm
-<<<<<<< HEAD
-<<<<<<< HEAD
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in
-#   version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended
-#   to not include it
-=======
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
->>>>>>> 18ee153ae12b633c66915754ab6164940d58acd7
-=======
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea
-#   in version control.
-#   https://pdm.fming.dev/#use-with-ide
-.pdm.toml
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and
-# github.com/pdm-project/pdm
-=======
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
->>>>>>> 18ee153ae12b633c66915754ab6164940d58acd7
-=======
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea
 __pypackages__/
 
 # Celery stuff
@@ -220,8 +128,6 @@ dmypy.json
 cython_debug/
 
 # PyCharm
-<<<<<<< HEAD
-<<<<<<< HEAD
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore
 #  that can
 #  be found at
@@ -262,15 +168,3 @@ lerna-debug.log*
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /tags
-=======
-=======
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
-<<<<<<< HEAD
->>>>>>> 18ee153ae12b633c66915754ab6164940d58acd7
-=======
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea

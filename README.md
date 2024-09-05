@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Services for Fluid Ontologies
 
 This flask application provides services for integrating Fluid Ontologies into WissKI.
@@ -56,9 +54,3 @@ This reports list of items ordered by ranking from the database.
 ### Obtaining Recommendations for New Users
 
 New users get to see the list of most average cluster items.
-=======
-# fluon_wisski_training
->>>>>>> 18ee153ae12b633c66915754ab6164940d58acd7
-=======
-# fluon_wisski_server
->>>>>>> a8b2c9a06ee77870385764cae2efa1ea8c524eea
