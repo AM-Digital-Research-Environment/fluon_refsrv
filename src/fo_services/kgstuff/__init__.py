@@ -90,7 +90,7 @@ class KGHandler(object):
 
         db_session.commit()
 
-    def load_shit(self):
+    def load_sampled_data(self):
         # import recommendable items to database
         # ~ self.N = self.fill_sample_users()
 

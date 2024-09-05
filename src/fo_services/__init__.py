@@ -58,7 +58,7 @@ def create_app(test_config=None):
         ldap_config = tomllib.load(f)
 
     LDAP.init_app(app, ldap_config)
-    KG.load_shit()
+    KG.load_sampled_data()
 
     from .api_app_v1 import bp as api
     from .api_maintenance_v1 import bp as maintenance
